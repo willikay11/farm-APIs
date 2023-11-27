@@ -1,4 +1,4 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Mutation, Parent, Query, ResolveField, Resolver } from "@nestjs/graphql";
 import { CreateStaffMember, StaffMember } from "./staff.model";
 import { StaffService } from './staff.service';
 // import { StaffMemberInterface } from "./interfaces/staff.interface";
@@ -16,5 +16,10 @@ export class StaffResolver {
   @Mutation(() => StaffMember)
   async createMember(@Args('createStaffMember') newMember: CreateStaffMember) {
     return await this.staffMemberService.create(newMember);
+  }
+
+  @Query(() => [StaffMember])
+  async getStaffMembers() {
+    return await this.staffMemberService.findAll();
   }
 }
