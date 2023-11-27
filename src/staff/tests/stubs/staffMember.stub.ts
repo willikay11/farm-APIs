@@ -1,5 +1,5 @@
 export const StaffMemberStub = {
-  name: 'Michael Barnum',
+  name: 'Tilly Ensign',
   type: 'salaried',
-  idNumber: '1378918732',
+  idNumber: '7812378133',
 };
