@@ -1,17 +1,20 @@
-import { Args, Query, Resolver } from '@nestjs/graphql';
-import { Staff } from './staff.model';
+import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { CreateStaffMember, StaffMember } from "./staff.model";
+import { StaffService } from './staff.service';
+// import { StaffMemberInterface } from "./interfaces/staff.interface";
+// import { StaffMemberDto } from "./dto/staffMember.dto";
 
 @Resolver()
 export class StaffResolver {
-  constructor() {}
+  constructor(private staffMemberService: StaffService) {}
 
-  @Query(() => Staff)
+  @Query(() => StaffMember)
   async staffMember(@Args('id') id: string) {
-    console.log('id: ', id);
-    return {
-      id: '1',
-      name: 'Will',
-      idNumber: '901293013',
-    };
+    return await this.staffMemberService.findById(id);
+  }
+
+  @Mutation(() => StaffMember)
+  async createMember(@Args('createStaffMember') newMember: CreateStaffMember) {
+    return await this.staffMemberService.create(newMember);
   }
 }

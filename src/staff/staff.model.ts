@@ -1,16 +1,34 @@
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, InputType, ObjectType } from "@nestjs/graphql";
 
 @ObjectType()
-export class Staff {
+export class StaffMember {
   @Field()
   id: string;
 
-  @Field({ nullable: false })
+  @Field()
   name?: string;
 
   @Field()
   idNumber: string;
 
   @Field()
+  type: 'salaried' | 'day-bug';
+
+  @Field()
   createdAt: string;
+
+  @Field()
+  updatedAt: string;
+}
+
+@InputType()
+export class CreateStaffMember {
+  @Field()
+  name: string;
+
+  @Field()
+  idNumber: string;
+
+  @Field()
+  type: 'salaried' | 'day-bug';
 }
