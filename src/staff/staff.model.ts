@@ -6,7 +6,7 @@ export class StaffMember {
   id: string;
 
   @Field()
-  name?: string;
+  name: string;
 
   @Field()
   idNumber: string;
