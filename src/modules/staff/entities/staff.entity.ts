@@ -4,7 +4,9 @@ import {
   Model,
   DataType,
   DeletedAt,
+  HasMany,
 } from 'sequelize-typescript';
+import { Payout } from './payout.entity';
 
 @Table
 export class StaffMember extends Model<StaffMember> {
@@ -30,4 +32,7 @@ export class StaffMember extends Model<StaffMember> {
 
   @DeletedAt
   declare deletedAt: Date | null;
+
+  @HasMany(() => Payout)
+  payout: Payout[];
 }

@@ -1,7 +1,8 @@
 import { Sequelize } from 'sequelize-typescript';
 import { SEQUELIZE, DEVELOPMENT, TEST, PRODUCTION } from '../constants';
 import { databaseConfig } from './database.config';
-import { StaffMember } from '../../staff/staff.entity';
+import { StaffMember } from '../../modules/staff/entities/staff.entity';
+import { Payout } from '../../modules/staff/entities/payout.entity';
 
 export const databaseProviders = [
   {
@@ -22,7 +23,7 @@ export const databaseProviders = [
           config = databaseConfig.development;
       }
       const sequelize = new Sequelize(config);
-      sequelize.addModels([StaffMember]);
+      sequelize.addModels([StaffMember, Payout]);
       await sequelize.sync();
       return sequelize;
     },

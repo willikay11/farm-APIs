@@ -1,4 +1,4 @@
-import { IntegrationTestManager } from '../../../test/integrationTestManager';
+import { IntegrationTestManager } from '../../../../test/integrationTestManager';
 import request from 'supertest-graphql';
 import gql from 'graphql-tag';
 import { StaffMember } from '../../staff.model';

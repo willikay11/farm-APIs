@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { STAFF_MEMBER_REPOSITORY } from '../core/constants';
-import { StaffMember } from './staff.entity';
+import { STAFF_MEMBER_REPOSITORY } from '../../core/constants';
+import { StaffMember } from './entities/staff.entity';
 // import { StaffMemberDto } from './dto/staffMember.dto';
 // import { CreateStaffMember } from "./staff.model";
 
