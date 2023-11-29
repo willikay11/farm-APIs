@@ -4,19 +4,36 @@ import { AppService } from './app.service';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { StaffModule } from './modules/staff/staff.module';
-import { DatabaseModule } from './core/database/database.module';
-import { ConfigModule } from '@nestjs/config';
+import { SequelizeModule } from '@nestjs/sequelize';
+import { StaffMember } from './modules/staff/entities/staff.entity';
+import { Payout } from './modules/staff/entities/payout.entity';
+import * as process from 'process';
+import { ConfigModule } from "@nestjs/config";
+
+console.log(process.env.NODE_ENV);
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
-    DatabaseModule,
+    ConfigModule.forRoot(),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: true,
     }),
+    SequelizeModule.forRoot({
+      dialect: 'postgres',
+      host: process.env.DB_HOST,
+      port: 5432,
+      username: process.env.DB_USER,
+      password: process.env.DB_PASS,
+      database:
+        process.env.NODE_ENV === 'development'
+          ? process.env.DB_NAME_DEVELOPMENT
+          : process.env.NODE_ENV === 'test'
+            ? process.env.DB_NAME_TEST
+            : process.env.DB_NAME_PRODUCTION,
+      models: [StaffMember, Payout],
+    }),
     StaffModule,
-    DatabaseModule,
   ],
   controllers: [AppController],
   providers: [AppService],

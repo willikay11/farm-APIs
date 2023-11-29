@@ -20,7 +20,7 @@ export class Payout extends Model<Payout> {
     allowNull: false,
     defaultValue: 0,
   })
-  retainer: string;
+  retainer: number;
 
   @Column({
     type: DataType.STRING,

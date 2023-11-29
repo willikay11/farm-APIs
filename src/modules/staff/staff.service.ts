@@ -1,19 +1,47 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { STAFF_MEMBER_REPOSITORY } from '../../core/constants';
+import { Injectable } from '@nestjs/common';
 import { StaffMember } from './entities/staff.entity';
-// import { StaffMemberDto } from './dto/staffMember.dto';
-// import { CreateStaffMember } from "./staff.model";
+import { Payout } from './entities/payout.entity';
+import { CreateStaffMember } from './staff.model';
+import { Sequelize } from 'sequelize-typescript';
+import { InjectModel } from '@nestjs/sequelize';
 
 @Injectable()
 export class StaffService {
   constructor(
-    @Inject(STAFF_MEMBER_REPOSITORY)
+    private readonly sequelize: Sequelize,
+
+    @InjectModel(StaffMember)
     private readonly staffMemberRepository: typeof StaffMember,
+
+    @InjectModel(Payout)
+    private readonly payoutRepository: typeof Payout,
   ) {}
 
-  async create(staffMember: unknown) {
+  async create(staffMember: CreateStaffMember) {
     try {
-      return await this.staffMemberRepository.create<StaffMember>(staffMember);
+      return await this.sequelize.transaction(async (t) => {
+        const staff = await this.staffMemberRepository.create<StaffMember>(
+          {
+            type: staffMember.type,
+            name: staffMember.name,
+            idNumber: staffMember.idNumber,
+          },
+          { transaction: t },
+        );
+
+        await this.payoutRepository.create<Payout>(
+          {
+            staffMemberId: staff.id,
+            huddleRate: staffMember.huddleRate,
+            retainer: staffMember.retainer,
+            amountPerKg: staffMember.amountPerKg,
+            phoneNumber: staffMember.phoneNumber,
+          },
+          { transaction: t },
+        );
+
+        return staff;
+      });
     } catch (e) {
       throw new Error(e);
     }

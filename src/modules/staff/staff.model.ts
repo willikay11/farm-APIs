@@ -1,4 +1,4 @@
-import { Field, InputType, ObjectType } from "@nestjs/graphql";
+import { Field, InputType, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()
 export class StaffMember {
@@ -31,4 +31,16 @@ export class CreateStaffMember {
 
   @Field()
   type: 'salaried' | 'day-bug';
+
+  @Field()
+  retainer: number;
+
+  @Field()
+  phoneNumber: string;
+
+  @Field()
+  huddleRate: number;
+
+  @Field()
+  amountPerKg: number;
 }

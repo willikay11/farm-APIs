@@ -1,9 +1,12 @@
 import { Module } from '@nestjs/common';
 import { StaffService } from './staff.service';
 import { StaffResolver } from './staff.resolver';
-import { StaffMemberProviders } from './staffMember.providers';
+import { SequelizeModule } from '@nestjs/sequelize';
+import { StaffMember } from './entities/staff.entity';
+import { Payout } from './entities/payout.entity';
 
 @Module({
-  providers: [StaffService, ...StaffMemberProviders, StaffResolver],
+  imports: [SequelizeModule.forFeature([StaffMember, Payout])],
+  providers: [StaffService, StaffResolver],
 })
 export class StaffModule {}
