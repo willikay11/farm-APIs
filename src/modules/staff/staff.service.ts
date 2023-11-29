@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { StaffMember } from './entities/staff.entity';
 import { Payout } from './entities/payout.entity';
-import { CreateStaffMember } from './staff.model';
+import {
+  CreatePayout,
+  CreateStaffMember,
+  EditStaffMember,
+} from './staff.model';
 import { Sequelize } from 'sequelize-typescript';
 import { InjectModel } from '@nestjs/sequelize';
 
@@ -47,6 +51,72 @@ export class StaffService {
     }
   }
 
+  async edit(id: string, staffMember: EditStaffMember) {
+    try {
+      const staff = await this.staffMemberRepository.findOne({
+        where: {
+          id,
+        },
+      });
+
+      if (!staff) return new Error('Staff member not found');
+
+      return await staff.update({
+        idNumber: staffMember.idNumber,
+        name: staffMember.name,
+        type: staffMember.type,
+      });
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+
+  async editPayout(id: string, payout: CreatePayout) {
+    try {
+      const staff = await this.staffMemberRepository.findOne({
+        where: {
+          id,
+        },
+      });
+
+      if (!staff) return new Error('Staff member not found');
+
+      return await this.sequelize.transaction(async (t) => {
+        const newPayout = await this.payoutRepository.create<Payout>(
+          {
+            staffMemberId: staff.id,
+            huddleRate: payout.huddleRate,
+            retainer: payout.retainer,
+            amountPerKg: payout.amountPerKg,
+            phoneNumber: payout.phoneNumber,
+          },
+          { transaction: t },
+        );
+
+        await this.payoutRepository.destroy({
+          where: {
+            staffMemberId: staff.id,
+          },
+        });
+
+        return newPayout;
+      });
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+
+  async deactivate(id: string) {
+    try {
+      return await this.staffMemberRepository.destroy<StaffMember>({
+        where: {
+          id,
+        },
+      });
+    } catch (e) {
+      throw new Error('No staff member exists');
+    }
+  }
   async findById(id: string) {
     try {
       return await this.staffMemberRepository.findOne<StaffMember>({
