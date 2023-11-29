@@ -7,6 +7,7 @@ import {
   HasMany,
 } from 'sequelize-typescript';
 import { Payout } from './payout.entity';
+import { Block } from '../../block/entities/block.entity';
 
 @Table
 export class StaffMember extends Model<StaffMember> {
@@ -35,4 +36,7 @@ export class StaffMember extends Model<StaffMember> {
 
   @HasMany(() => Payout)
   payout: Payout[];
+
+  @HasMany(() => Block)
+  block: Block[];
 }

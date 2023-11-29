@@ -9,6 +9,7 @@ import { StaffMember } from './modules/staff/entities/staff.entity';
 import { Payout } from './modules/staff/entities/payout.entity';
 import * as process from 'process';
 import { ConfigModule } from '@nestjs/config';
+import { BlockModule } from './modules/block/block.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { ConfigModule } from '@nestjs/config';
             : process.env.DB_NAME_PRODUCTION,
     }),
     StaffModule,
+    BlockModule,
   ],
   controllers: [AppController],
   providers: [AppService],
