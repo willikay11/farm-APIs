@@ -1,4 +1,4 @@
-import { IntegrationTestManager } from '../../../test/integrationTestManager';
+import { IntegrationTestManager } from '../../../../test/integrationTestManager';
 import request from 'supertest-graphql';
 import gql from 'graphql-tag';
 import { StaffMember } from '../../staff.model';
@@ -33,6 +33,10 @@ describe('create staff member', () => {
               name: StaffMemberStub.name,
               type: StaffMemberStub.type,
               idNumber: StaffMemberStub.idNumber,
+              retainer: StaffMemberStub.retainer,
+              phoneNumber: StaffMemberStub.phoneNumber,
+              huddleRate: StaffMemberStub.huddleRate,
+              amountPerKg: StaffMemberStub.amountPerKg,
             },
           })
           .expectNoErrors();

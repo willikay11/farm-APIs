@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { StaffMember } from './entities/staff.entity';
 import { Payout } from './entities/payout.entity';
 import {
@@ -59,7 +59,7 @@ export class StaffService {
         },
       });
 
-      if (!staff) return new Error('Staff member not found');
+      if (!staff) return new BadRequestException('Staff member not found');
 
       return await staff.update({
         idNumber: staffMember.idNumber,
@@ -79,7 +79,7 @@ export class StaffService {
         },
       });
 
-      if (!staff) return new Error('Staff member not found');
+      if (!staff) return new BadRequestException('Staff member not found');
 
       return await this.sequelize.transaction(async (t) => {
         const newPayout = await this.payoutRepository.create<Payout>(
@@ -114,7 +114,7 @@ export class StaffService {
         },
       });
     } catch (e) {
-      throw new Error('No staff member exists');
+      throw new BadRequestException('No staff member exists');
     }
   }
   async findById(id: string) {
@@ -125,7 +125,7 @@ export class StaffService {
         },
       });
     } catch (e) {
-      throw new Error('No staff member exists');
+      throw new BadRequestException('No staff member exists');
     }
   }
 
