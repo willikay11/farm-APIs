@@ -9,6 +9,7 @@ import * as process from 'process';
 import { ConfigModule } from '@nestjs/config';
 import { BlockModule } from './modules/block/block.module';
 import { TransactionModule } from './modules/transaction/transaction.module';
+import { ExpenseModule } from './modules/expense/expense.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { TransactionModule } from './modules/transaction/transaction.module';
     StaffModule,
     BlockModule,
     TransactionModule,
+    ExpenseModule,
   ],
   controllers: [AppController],
   providers: [AppService],
