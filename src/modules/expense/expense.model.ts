@@ -23,7 +23,7 @@ export class Expense {
   payoutIdentity: string;
 
   @Field({ nullable: true })
-  narration: number;
+  narration: string;
 
   @Field({ nullable: true })
   transaction: Transaction;

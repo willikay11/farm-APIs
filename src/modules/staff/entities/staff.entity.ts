@@ -42,5 +42,5 @@ export class StaffMember extends Model<StaffMember> {
   block: Block[];
 
   @HasMany(() => Transaction)
-  picking: Transaction[];
+  transactions: Transaction[];
 }

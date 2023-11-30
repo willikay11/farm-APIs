@@ -10,6 +10,7 @@ import { ConfigModule } from '@nestjs/config';
 import { BlockModule } from './modules/block/block.module';
 import { TransactionModule } from './modules/transaction/transaction.module';
 import { ExpenseModule } from './modules/expense/expense.module';
+import { TargetModule } from './modules/target/target.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { ExpenseModule } from './modules/expense/expense.module';
     BlockModule,
     TransactionModule,
     ExpenseModule,
+    TargetModule,
   ],
   controllers: [AppController],
   providers: [AppService],
