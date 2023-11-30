@@ -1,7 +1,7 @@
 export const StaffMemberStub = {
   name: 'Tilly Ensign',
   type: 'salaried',
-  idNumber: '10823133890294',
+  idNumber: '14823133890294',
   retainer: 5000,
   phoneNumber: '+254706020933',
   huddleRate: 16,
