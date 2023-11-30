@@ -1,6 +1,10 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { TransactionService } from './transaction.service';
-import { CreateTransaction, Transaction } from './transaction.model';
+import {
+  CheckoutTransactions,
+  CreateTransaction,
+  Transaction,
+} from './transaction.model';
 
 @Resolver()
 export class TransactionResolver {
@@ -27,5 +31,10 @@ export class TransactionResolver {
   @Query(() => [Transaction])
   async getTransactions() {
     return await this.transactionService.findAll();
+  }
+
+  @Mutation(() => String)
+  async checkout(@Args('transactions') transactions: CheckoutTransactions) {
+    return await this.transactionService.checkout(transactions);
   }
 }

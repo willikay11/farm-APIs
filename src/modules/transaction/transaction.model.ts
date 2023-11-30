@@ -60,3 +60,15 @@ export class CreateTransaction {
   @Field()
   amount: number;
 }
+
+@InputType()
+export class CheckoutTransactions {
+  @Field(() => [Number], {})
+  transactions: number[];
+
+  @Field()
+  date: string;
+
+  @Field()
+  payoutMethod: string;
+}
