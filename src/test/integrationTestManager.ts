@@ -5,6 +5,7 @@ import { INestApplication } from '@nestjs/common';
 export class IntegrationTestManager {
   public httpServer: any;
   private app: INestApplication;
+
   async beforeAll(): Promise<void> {
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule],

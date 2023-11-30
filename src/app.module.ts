@@ -5,11 +5,10 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { StaffModule } from './modules/staff/staff.module';
 import { SequelizeModule } from '@nestjs/sequelize';
-import { StaffMember } from './modules/staff/entities/staff.entity';
-import { Payout } from './modules/staff/entities/payout.entity';
 import * as process from 'process';
 import { ConfigModule } from '@nestjs/config';
 import { BlockModule } from './modules/block/block.module';
+import { TransactionModule } from './modules/transaction/transaction.module';
 
 @Module({
   imports: [
@@ -36,6 +35,7 @@ import { BlockModule } from './modules/block/block.module';
     }),
     StaffModule,
     BlockModule,
+    TransactionModule,
   ],
   controllers: [AppController],
   providers: [AppService],
