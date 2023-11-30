@@ -12,20 +12,20 @@ export class TransactionResolver {
   }
 
   @Mutation(() => Transaction)
-  async createBlock(@Args('transaction') block: CreateTransaction) {
-    return await this.transactionService.create(block);
+  async createTransaction(@Args('transaction') transaction: CreateTransaction) {
+    return await this.transactionService.create(transaction);
   }
 
   @Mutation(() => Transaction)
-  async editBlock(
+  async editTransaction(
     @Args('id') id: number,
-    @Args('block') transaction: CreateTransaction,
+    @Args('transaction') transaction: CreateTransaction,
   ) {
     return await this.transactionService.edit(id, transaction);
   }
 
   @Query(() => [Transaction])
-  async getBlocks() {
+  async getTransactions() {
     return await this.transactionService.findAll();
   }
 }

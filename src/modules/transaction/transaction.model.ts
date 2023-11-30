@@ -21,7 +21,7 @@ export class TransactionStatus {
 }
 @ObjectType()
 export class Transaction {
-  @Field({ nullable: true })
+  @Field()
   id: number;
 
   @Field()

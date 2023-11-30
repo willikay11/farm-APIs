@@ -5,6 +5,8 @@ import { CreateTransaction } from './transaction.model';
 import { Sequelize } from 'sequelize-typescript';
 import { TransactionStatus } from './entities/transactionStatus.entity';
 import { TransactionStatusEnum } from './enum';
+import { Block } from '../block/entities/block.entity';
+import { StaffMember } from '../staff/entities/staff.entity';
 
 @Injectable()
 export class TransactionService {
@@ -28,6 +30,7 @@ export class TransactionService {
 
         await this.transactionStatusRepository.create(
           {
+            transactionId: newTransaction.id,
             status: TransactionStatusEnum.PENDING,
           },
           { transaction: t },
@@ -41,7 +44,9 @@ export class TransactionService {
   }
 
   async findAll() {
-    return await this.transactionRepository.findAll();
+    return await this.transactionRepository.findAll({
+      include: [Block, StaffMember],
+    });
   }
 
   async findById(id: number) {
@@ -50,6 +55,7 @@ export class TransactionService {
         where: {
           id,
         },
+        include: [Block, StaffMember],
       });
     } catch (e) {
       throw new BadRequestException('No transaction exists');
@@ -62,9 +68,19 @@ export class TransactionService {
         where: {
           id,
         },
+        include: [{ model: TransactionStatus, order: [['createdAt', 'DESC']] }],
       });
 
       if (!transaction) return new BadRequestException('Transaction not found');
+
+      if (
+        transaction.transactionStatuses?.[0]?.status !==
+        TransactionStatusEnum.PENDING
+      ) {
+        return new BadRequestException(
+          `Can not update a transaction in ${transaction.transactionStatuses?.[0]?.status} state`,
+        );
+      }
 
       return transaction.update({
         amount: editTransaction.amount,
