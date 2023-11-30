@@ -157,6 +157,30 @@ export class TransactionService {
     }
   }
 
+  async getPendingTransactions() {
+    try {
+      const transactions = await this.transactionRepository.findAll({
+        include: [
+          {
+            model: TransactionStatus,
+            where: { status: TransactionStatusEnum.PENDING },
+          },
+          { model: StaffMember, include: [Payout] },
+        ],
+      });
+
+      return transactions.map((transaction) => {
+        transaction.amount = this.calculateAmount(
+          transaction?.amount,
+          transaction?.staffMember?.payout?.[0],
+        );
+        return transaction;
+      });
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+
   private calculateAmount(amount: number, payout: Payout) {
     if (amount <= payout.huddleRate) return 0;
 

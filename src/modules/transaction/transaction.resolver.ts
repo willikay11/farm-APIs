@@ -37,4 +37,9 @@ export class TransactionResolver {
   async checkout(@Args('transactions') transactions: CheckoutTransactions) {
     return await this.transactionService.checkout(transactions);
   }
+
+  @Query(() => [Transaction])
+  async getPendingTransactions() {
+    return await this.transactionService.getPendingTransactions();
+  }
 }
