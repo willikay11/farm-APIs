@@ -21,7 +21,7 @@ describe('edit staff member', () => {
         )
           .mutate(gql`
             mutation EditStaffMember(
-              $id: String!
+              $id: Float!
               $type: String!
               $idNumber: String!
               $name: String!

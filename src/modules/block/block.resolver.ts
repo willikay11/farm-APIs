@@ -17,7 +17,7 @@ export class BlockResolver {
   }
 
   @Mutation(() => Block)
-  async editMember(@Args('id') id: number, @Args('block') block: CreateBlock) {
+  async editBlock(@Args('id') id: number, @Args('block') block: CreateBlock) {
     return await this.blockService.edit(id, block);
   }
 

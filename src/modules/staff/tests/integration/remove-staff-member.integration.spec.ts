@@ -20,7 +20,7 @@ describe('deactivate a staff member', () => {
           integrationTestManager.httpServer,
         )
           .mutate(gql`
-            mutation DeactivateStaff($id: String!) {
+            mutation DeactivateStaff($id: Float!) {
               deactivate(id: $id) {
                 id
               }

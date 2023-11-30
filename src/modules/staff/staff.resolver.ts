@@ -26,7 +26,7 @@ export class StaffResolver {
 
   @Mutation(() => StaffMember)
   async editMember(
-    @Args('id') id: string,
+    @Args('id') id: number,
     @Args('member') member: EditStaffMember,
   ) {
     return await this.staffMemberService.edit(id, member);
@@ -46,7 +46,7 @@ export class StaffResolver {
   }
 
   @Mutation(() => StaffMember)
-  async deactivate(@Args('id') id: string) {
+  async deactivate(@Args('id') id: number) {
     return await this.staffMemberService.deactivate(id);
   }
 }
