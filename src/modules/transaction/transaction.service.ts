@@ -3,12 +3,14 @@ import { InjectModel } from '@nestjs/sequelize';
 import { Transaction } from './entities/transaction.entity';
 import { CheckoutTransactions, CreateTransaction } from './transaction.model';
 import { Sequelize } from 'sequelize-typescript';
+import { Op } from 'sequelize';
 import { TransactionStatus } from './entities/transactionStatus.entity';
 import { TransactionStatusEnum } from './enum';
 import { Block } from '../block/entities/block.entity';
 import { StaffMember } from '../staff/entities/staff.entity';
 import { Expense } from '../expense/entities/expense.entity';
 import { Payout } from '../staff/entities/payout.entity';
+import { Target } from '../target/entities/target.entity';
 
 @Injectable()
 export class TransactionService {
@@ -176,6 +178,44 @@ export class TransactionService {
         );
         return transaction;
       });
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+
+  async calculateStaffProgress(id: number, startDate: string, endDate: string) {
+    try {
+      const transactions = await this.transactionRepository.findAll({
+        where: {
+          staffMemberId: id,
+        },
+        include: [
+          {
+            model: StaffMember,
+            include: [
+              {
+                model: Target,
+                // where: {
+                //   startDate: {
+                //     [Op.gte]: startDate,
+                //   },
+                //   endDate: {
+                //     [Op.lt]: endDate,
+                //   },
+                // },
+              },
+            ],
+          },
+        ],
+      });
+
+      return {
+        target: transactions?.[0]?.staffMember?.target?.[0]?.amount || 0,
+        amount: transactions?.reduce(
+          (accumulator, transaction) => accumulator + transaction.amount,
+          0,
+        ),
+      };
     } catch (e) {
       throw new Error(e);
     }

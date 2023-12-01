@@ -3,6 +3,7 @@ import { TransactionService } from './transaction.service';
 import {
   CheckoutTransactions,
   CreateTransaction,
+  StaffProgress,
   Transaction,
 } from './transaction.model';
 
@@ -41,5 +42,18 @@ export class TransactionResolver {
   @Query(() => [Transaction])
   async getPendingTransactions() {
     return await this.transactionService.getPendingTransactions();
+  }
+
+  @Query(() => StaffProgress)
+  async calculateStaffProgress(
+    @Args('id') id: number,
+    @Args('startDate') startDate: string,
+    @Args('endDate') endDate: string,
+  ) {
+    return await this.transactionService.calculateStaffProgress(
+      id,
+      startDate,
+      endDate,
+    );
   }
 }

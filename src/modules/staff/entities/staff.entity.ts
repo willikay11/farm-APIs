@@ -9,6 +9,7 @@ import {
 import { Payout } from './payout.entity';
 import { Block } from '../../block/entities/block.entity';
 import { Transaction } from '../../transaction/entities/transaction.entity';
+import { Target } from '../../target/entities/target.entity';
 
 @Table
 export class StaffMember extends Model<StaffMember> {
@@ -43,4 +44,7 @@ export class StaffMember extends Model<StaffMember> {
 
   @HasMany(() => Transaction)
   transactions: Transaction[];
+
+  @HasMany(() => Target)
+  target: Target[];
 }

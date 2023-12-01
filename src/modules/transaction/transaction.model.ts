@@ -46,6 +46,14 @@ export class Transaction {
   updatedAt: string;
 }
 
+@ObjectType()
+export class StaffProgress {
+  @Field()
+  target: number;
+
+  @Field()
+  amount: number;
+}
 @InputType()
 export class CreateTransaction {
   @Field()
