@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import { StaffMember } from '../staff/entities/staff.entity';
 import { Target } from './entities/target.entity';
 import { CreateTarget } from './target.model';
+import { Op } from 'sequelize';
 
 @Injectable()
 export class TargetService {
@@ -13,6 +14,22 @@ export class TargetService {
 
   async create(target: CreateTarget) {
     try {
+      const currentTarget = await this.targetRepository.findOne({
+        where: {
+          staffMemberId: target.staffMemberId,
+          startDate: {
+            [Op.between]: [
+              new Date(target.startDate),
+              new Date(target.endDate),
+            ],
+          },
+        },
+      });
+
+      if (currentTarget)
+        return new BadRequestException(
+          'Staff Member already has target for the selected time period',
+        );
       return this.targetRepository.create<Target>(target);
     } catch (e) {
       throw new Error(e);

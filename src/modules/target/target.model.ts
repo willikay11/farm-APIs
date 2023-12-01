@@ -36,6 +36,6 @@ export class CreateTarget {
   @Field()
   amount: number;
 
-  @Field({ nullable: true })
+  @Field()
   staffMemberId: number;
 }

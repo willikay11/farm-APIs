@@ -25,6 +25,9 @@ export class TransactionService {
 
     @InjectModel(Expense)
     private readonly expenseRepository: typeof Expense,
+
+    @InjectModel(StaffMember)
+    private readonly staffMemberRepository: typeof StaffMember,
   ) {}
 
   async create(transaction: CreateTransaction) {
@@ -185,32 +188,32 @@ export class TransactionService {
 
   async calculateStaffProgress(id: number, startDate: string, endDate: string) {
     try {
-      const transactions = await this.transactionRepository.findAll({
+      const staffMember = await this.staffMemberRepository.findOne({
         where: {
-          staffMemberId: id,
+          id,
         },
         include: [
           {
-            model: StaffMember,
-            include: [
-              {
-                model: Target,
-                // where: {
-                //   startDate: {
-                //     [Op.gte]: startDate,
-                //   },
-                //   endDate: {
-                //     [Op.lt]: endDate,
-                //   },
-                // },
+            model: Target,
+            where: {
+              startDate: {
+                [Op.between]: [new Date(startDate), new Date(endDate)],
               },
-            ],
+            },
           },
         ],
       });
+      const transactions = await this.transactionRepository.findAll({
+        where: {
+          staffMemberId: id,
+          date: {
+            [Op.between]: [new Date(startDate), new Date(endDate)],
+          },
+        },
+      });
 
       return {
-        target: transactions?.[0]?.staffMember?.target?.[0]?.amount || 0,
+        target: staffMember?.target?.[0]?.amount || 0,
         amount: transactions?.reduce(
           (accumulator, transaction) => accumulator + transaction.amount,
           0,
