@@ -7,8 +7,11 @@ import {
   StaffProgress,
   Transaction,
 } from './transaction.model';
+import { UseGuards } from '@nestjs/common';
+import { GqlAuthGuard } from '../auth/jwt-auth.guard';
 
 @Resolver()
+@UseGuards(GqlAuthGuard)
 export class TransactionResolver {
   constructor(private transactionService: TransactionService) {}
 
