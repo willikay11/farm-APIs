@@ -3,6 +3,7 @@ import { TransactionService } from './transaction.service';
 import {
   CheckoutTransactions,
   CreateTransaction,
+  Progress,
   StaffProgress,
   Transaction,
 } from './transaction.model';
@@ -55,5 +56,13 @@ export class TransactionResolver {
       startDate,
       endDate,
     );
+  }
+
+  @Query(() => [Progress])
+  async calculateProgress(
+    @Args('startDate') startDate: string,
+    @Args('endDate') endDate: string,
+  ) {
+    return await this.transactionService.calculateProgress(startDate, endDate);
   }
 }

@@ -16,6 +16,14 @@ export class TargetResolver {
     return await this.targetService.create(target);
   }
 
+  @Mutation(() => Target)
+  async editTarget(
+    @Args('id') id: number,
+    @Args('target') target: CreateTarget,
+  ) {
+    return await this.targetService.edit(id, target);
+  }
+
   @Query(() => [Target])
   async getTargets() {
     return await this.targetService.findAll();

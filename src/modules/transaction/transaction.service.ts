@@ -186,6 +186,57 @@ export class TransactionService {
     }
   }
 
+  async calculateProgress(startDate: string, endDate: string) {
+    try {
+      const progress: { name: string; target: number; current: number }[] = [];
+      const staffMemberTransactions = await this.transactionRepository.findAll({
+        where: {
+          date: {
+            [Op.between]: [new Date(startDate), new Date(endDate)],
+          },
+        },
+        include: [
+          {
+            model: StaffMember,
+            include: [
+              {
+                model: Target,
+                where: {
+                  startDate: {
+                    [Op.gte]: new Date(startDate),
+                  },
+                  endDate: {
+                    [Op.lte]: new Date(endDate),
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      });
+
+      staffMemberTransactions.forEach((transaction) => {
+        const foundItem = progress.find(
+          (p) => p.name === transaction.staffMember.name,
+        );
+
+        if (foundItem) {
+          foundItem.current += transaction.amount;
+        } else {
+          progress.push({
+            name: transaction.staffMember.name,
+            current: transaction?.amount,
+            target: transaction?.staffMember?.target?.[0]?.amount || 0,
+          });
+        }
+      });
+
+      return progress;
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
+
   async calculateStaffProgress(id: number, startDate: string, endDate: string) {
     try {
       const staffMember = await this.staffMemberRepository.findOne({

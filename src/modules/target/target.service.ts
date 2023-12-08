@@ -54,4 +54,18 @@ export class TargetService {
       throw new BadRequestException('No target exists');
     }
   }
+
+  async edit(id: number, target: CreateTarget) {
+    try {
+      const currentTarget = await this.targetRepository.findOne({
+        where: { id },
+      });
+
+      if (!currentTarget) return new BadRequestException('no target exists');
+
+      return currentTarget.update(target);
+    } catch (e) {
+      throw new Error(e);
+    }
+  }
 }
