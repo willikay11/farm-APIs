@@ -11,10 +11,11 @@ import { BlockModule } from './modules/block/block.module';
 import { TransactionModule } from './modules/transaction/transaction.module';
 import { ExpenseModule } from './modules/expense/expense.module';
 import { TargetModule } from './modules/target/target.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({ isGlobal: true }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: true,
@@ -40,6 +41,7 @@ import { TargetModule } from './modules/target/target.module';
     TransactionModule,
     ExpenseModule,
     TargetModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

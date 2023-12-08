@@ -7,10 +7,13 @@ import {
   StaffMember,
 } from './staff.model';
 import { StaffService } from './staff.service';
+import { GqlAuthGuard } from '../auth/jwt-auth.guard';
+import { UseGuards } from '@nestjs/common';
 // import { StaffMemberInterface } from "./interfaces/staff.interface";
 // import { StaffMemberDto } from "./dto/staffMember.dto";
 
 @Resolver()
+@UseGuards(GqlAuthGuard)
 export class StaffResolver {
   constructor(private staffMemberService: StaffService) {}
 
