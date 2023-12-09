@@ -12,6 +12,7 @@ import { TransactionModule } from './modules/transaction/transaction.module';
 import { ExpenseModule } from './modules/expense/expense.module';
 import { TargetModule } from './modules/target/target.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { UserModule } from './modules/user/user.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { AuthModule } from './modules/auth/auth.module';
     ExpenseModule,
     TargetModule,
     AuthModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,23 +1,37 @@
 import { Injectable } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
+import { CreateUser } from './user.model';
+import { Sequelize } from 'sequelize-typescript';
+import { InjectModel } from '@nestjs/sequelize';
+import { StaffMember } from '../staff/entities/staff.entity';
+import { Payout } from '../staff/entities/payout.entity';
+import { User } from './entities/user.entity';
 
-export type User = { userId: number; username: string; password: string };
+const saltOrRounds = 10;
 
 @Injectable()
 export class UserService {
-  private readonly users = [
-    {
-      userId: 1,
-      username: 'john',
-      password: 'changeme',
-    },
-    {
-      userId: 2,
-      username: 'maria',
-      password: 'guess',
-    },
-  ];
+  constructor(
+    private readonly sequelize: Sequelize,
 
-  async findOne(username: string): Promise<User | undefined> {
-    return this.users.find((user) => user.username === username);
+    @InjectModel(User)
+    private readonly userRepository: typeof User,
+  ) {}
+
+  async findOne(phoneNumber: string): Promise<User> {
+    return await this.userRepository.findOne({
+      where: {
+        phoneNumber,
+      },
+    });
+  }
+
+  async createUser(user: CreateUser) {
+    try {
+      user.password = await bcrypt.hash(user.password, saltOrRounds);
+      return await this.userRepository.create<User>(user);
+    } catch (e) {
+      throw new Error(e);
+    }
   }
 }
