@@ -1,39 +1,26 @@
-# development stage
+# Base image
+FROM node:18
 
-FROM node:lts-alpine3.14 As development
-
+# Create app directory
 WORKDIR /usr/src/app
 
-COPY package*.json .npmrc ./
+# A wildcard is used to ensure both package.json AND package-lock.json are copied
+COPY package*.json ./
 
+# Install app dependencies
 RUN npm install
 
+# Bundle app source
 COPY . .
 
+# Copy the .env and .env.development files
+COPY .env ./
+
+# Creates a "dist" folder with the production build
 RUN npm run build
 
-
-# production stage
-
-FROM node:lts-alpine3.14 as production
-
-#ARG NODE_ENV=production
-
-#ENV NODE_ENV=${NODE_ENV}
-
-WORKDIR /usr/src/app
-
-COPY package*.json .npmrc ./
-
-# Work around for husky
-RUN npm set-script prepare ''
-
-RUN npm install --only=production
-
-COPY . .
-
-COPY --from=development /usr/src/app/dist ./dist
-
+# Expose the port on which the app will run
 EXPOSE 3000
 
-CMD ["node", "dist/main"]
+# Start the server using the production build
+CMD ["npm", "run", "start:prod"]
