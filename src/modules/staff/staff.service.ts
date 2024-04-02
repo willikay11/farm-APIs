@@ -47,6 +47,7 @@ export class StaffService {
         return staff;
       });
     } catch (e) {
+      console.log(e);
       throw new Error(e);
     }
   }

@@ -56,14 +56,14 @@ export class CreateStaffMember {
   @Field()
   type: 'salaried' | 'day-bug';
 
-  @Field()
-  retainer: number;
+  @Field({ nullable: true })
+  retainer?: number;
 
-  @Field()
-  phoneNumber: string;
+  @Field({ nullable: true })
+  phoneNumber?: string;
 
-  @Field()
-  huddleRate: number;
+  @Field({ nullable: true })
+  huddleRate?: number;
 
   @Field()
   amountPerKg: number;

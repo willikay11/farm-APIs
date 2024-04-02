@@ -24,20 +24,21 @@ export class Payout extends Model<Payout> {
 
   @Column({
     type: DataType.STRING,
-    allowNull: false,
+    allowNull: true,
   })
   phoneNumber: string;
 
   @Column({
     type: DataType.INTEGER,
-    allowNull: false,
-  })
+    allowNull: true,
+    defaultValue: 0,
+})
   huddleRate: number;
 
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
-    defaultValue: 16,
+    defaultValue: 12,
   })
   amountPerKg: number;
 

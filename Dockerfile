@@ -8,7 +8,7 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # Install app dependencies
-RUN npm install
+RUN yarn install --ignore-engines
 
 # Bundle app source
 COPY . .
@@ -17,10 +17,10 @@ COPY . .
 COPY .env ./
 
 # Creates a "dist" folder with the production build
-RUN npm run build
+RUN yarn run build
 
 # Expose the port on which the app will run
-EXPOSE 3000
+EXPOSE 8080
 
 # Start the server using the production build
-CMD ["npm", "run", "start:prod"]
+CMD ["yarn", "run", "start:prod"]
