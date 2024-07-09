@@ -3,20 +3,47 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { StaffModule } from './staff/staff.module';
-import { DatabaseModule } from './core/database/database.module';
+import { StaffModule } from './modules/staff/staff.module';
+import { SequelizeModule } from '@nestjs/sequelize';
+import * as process from 'process';
 import { ConfigModule } from '@nestjs/config';
+import { BlockModule } from './modules/block/block.module';
+import { TransactionModule } from './modules/transaction/transaction.module';
+import { ExpenseModule } from './modules/expense/expense.module';
+import { TargetModule } from './modules/target/target.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { UserModule } from './modules/user/user.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    DatabaseModule,
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: true,
     }),
+    SequelizeModule.forRoot({
+      dialect: 'postgres',
+      host: process.env.DB_HOST,
+      port: 5432,
+      username: process.env.DB_USER,
+      password: process.env.DB_PASS,
+      autoLoadModels: true,
+      synchronize: true,
+      logging: false,
+      database:
+        process.env.NODE_ENV === 'development'
+          ? process.env.DB_NAME_DEVELOPMENT
+          : process.env.NODE_ENV === 'test'
+            ? process.env.DB_NAME_TEST
+            : process.env.DB_NAME_PRODUCTION,
+    }),
     StaffModule,
-    DatabaseModule,
+    BlockModule,
+    TransactionModule,
+    ExpenseModule,
+    TargetModule,
+    AuthModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],
