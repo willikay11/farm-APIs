@@ -17,8 +17,7 @@ export class AuthService {
     const isMatch = await bcrypt.compare(password, user.password);
     if (isMatch) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { password, ...result } = user;
-      return result;
+      return { id: user.id, phoneNumber: user.phoneNumber, name: user.name };
     }
     return null;
   }
@@ -26,7 +25,9 @@ export class AuthService {
   async login(user: User) {
     const payload = { phoneNumber: user.phoneNumber, sub: user.id };
     return {
-      access_token: this.jwtService.sign(payload),
+      id: user.id,
+      name: user.name,
+      accessToken: this.jwtService.sign(payload),
     };
   }
 }
