@@ -69,10 +69,10 @@ export class Progress {
 @InputType()
 export class CreateTransaction {
   @Field()
-  staffMemberId: number;
+  staffMemberId: string;
 
   @Field()
-  blockId: number;
+  blockId: string;
 
   @Field()
   date: string;

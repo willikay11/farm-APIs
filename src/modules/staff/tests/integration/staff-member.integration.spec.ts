@@ -9,9 +9,16 @@ import {
 
 describe('staff service', () => {
   const integrationTestManager = new IntegrationTestManager();
+  let authToken: string;
+  let createdStaffMemberId: string;
 
   beforeAll(async () => {
     await integrationTestManager.beforeAll();
+    authToken = integrationTestManager.getAuthTokenForTestUser();
+  });
+
+  afterAll(async () => {
+    await integrationTestManager.afterAll();
   });
 
   describe('create', () => {
@@ -23,6 +30,7 @@ describe('staff service', () => {
           const response = await request<{ createMember: StaffMember }>(
             integrationTestManager.httpServer,
           )
+            .set('Authorization', `Bearer ${authToken}`)
             .mutate(gql`
               mutation CreateMember($createStaffMember: CreateStaffMember!) {
                 createMember(createStaffMember: $createStaffMember) {
@@ -45,6 +53,7 @@ describe('staff service', () => {
             })
             .expectNoErrors();
           createdStaffMember = response.data?.createMember;
+          createdStaffMemberId = response?.data?.createMember?.id;
         });
 
         test('the response should be the newly created staff member', () => {
@@ -63,6 +72,7 @@ describe('staff service', () => {
 
         beforeAll(async () => {
           const response = await request<any>(integrationTestManager.httpServer)
+            .set('Authorization', `Bearer ${authToken}`)
             .query(gql`
               {
                 getStaffMembers {
@@ -93,9 +103,10 @@ describe('staff service', () => {
           const response = await request<{ staffMember: StaffMember }>(
             integrationTestManager.httpServer,
           )
+            .set('Authorization', `Bearer ${authToken}`)
             .query(gql`
-              {
-                staffMember(id: "1") {
+              query ($id: String!) {
+                staffMember(id: $id) {
                   id
                   name
                   idNumber
@@ -103,7 +114,7 @@ describe('staff service', () => {
               }
             `)
             .variables({
-              id: EditStaffMemberStub.id,
+              id: createdStaffMemberId,
             })
             .expectNoErrors();
           staffMember = response.data?.staffMember;
@@ -111,7 +122,7 @@ describe('staff service', () => {
 
         test('the response should have at least one record', () => {
           expect(staffMember).toMatchObject({
-            idNumber: EditStaffMemberStub.idNumber,
+            name: StaffMemberStub.name,
           });
         });
       });
@@ -127,9 +138,10 @@ describe('staff service', () => {
           const response = await request<{ editMember: StaffMember }>(
             integrationTestManager.httpServer,
           )
+            .set('Authorization', `Bearer ${authToken}`)
             .mutate(gql`
               mutation EditStaffMember(
-                $id: Float!
+                $id: String!
                 $type: String!
                 $idNumber: String!
                 $name: String!
@@ -145,7 +157,7 @@ describe('staff service', () => {
               }
             `)
             .variables({
-              id: EditStaffMemberStub.id,
+              id: createdStaffMemberId,
               name: EditStaffMemberStub.name,
               type: EditStaffMemberStub.type,
               idNumber: EditStaffMemberStub.idNumber,
@@ -172,15 +184,16 @@ describe('staff service', () => {
           const response = await request<{ deactivate: StaffMember }>(
             integrationTestManager.httpServer,
           )
+            .set('Authorization', `Bearer ${authToken}`)
             .mutate(gql`
-              mutation DeactivateStaff($id: Float!) {
+              mutation DeactivateStaff($id: String!) {
                 deactivate(id: $id) {
                   id
                 }
               }
             `)
             .variables({
-              id: EditStaffMemberStub.id,
+              id: createdStaffMemberId,
             })
             .expectNoErrors();
           deactivatedStaff = response.data?.deactivate;

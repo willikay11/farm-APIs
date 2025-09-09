@@ -6,9 +6,16 @@ import { Block } from '../../entities/block.entity';
 
 describe('block service', () => {
   const integrationTestManager = new IntegrationTestManager();
+  let authToken: string;
+  let createdBlockId: string;
 
   beforeAll(async () => {
     await integrationTestManager.beforeAll();
+    authToken = integrationTestManager.getAuthTokenForTestUser();
+  });
+
+  afterAll(async () => {
+    await integrationTestManager.afterAll();
   });
 
   describe('create', () => {
@@ -20,11 +27,13 @@ describe('block service', () => {
           const response = await request<{ createBlock: Block }>(
             integrationTestManager.httpServer,
           )
+            .set('Authorization', `Bearer ${authToken}`)
             .mutate(gql`
-              mutation CreateBlock($name: String!, $owner: Float!) {
-                createBlock(block: { name: $name, owner: $owner }) {
+              mutation CreateBlock($name: String!, $noOfBushes: Int!) {
+                createBlock(block: { name: $name, noOfBushes: $noOfBushes }) {
                   id
                   name
+                  noOfBushes
                   owner
                   createdAt
                   updatedAt
@@ -33,10 +42,11 @@ describe('block service', () => {
             `)
             .variables({
               name: BlockStub.name,
-              owner: BlockStub.owner,
+              noOfBushes: BlockStub.noOfBushes,
             })
             .expectNoErrors();
           createdBlock = response.data?.createBlock;
+          createdBlockId = createdBlock.id;
         });
 
         test('the response should be the newly created block', () => {
@@ -57,19 +67,27 @@ describe('block service', () => {
           const response = await request<{ editBlock: Block }>(
             integrationTestManager.httpServer,
           )
+            .set('Authorization', `Bearer ${authToken}`)
             .mutate(gql`
-              mutation EditBlock($id: Float!, $name: String!, $owner: Float!) {
-                editBlock(id: $id, block: { name: $name, owner: $owner }) {
+              mutation EditBlock(
+                $id: String!
+                $name: String!
+                $noOfBushes: Int!
+              ) {
+                editBlock(
+                  id: $id
+                  block: { name: $name, noOfBushes: $noOfBushes }
+                ) {
                   id
                   name
-                  owner
+                  noOfBushes
                 }
               }
             `)
             .variables({
-              id: EditBlockStub.id,
+              id: createdBlockId,
               name: EditBlockStub.name,
-              owner: EditBlockStub.owner,
+              noOfBushes: EditBlockStub.noOfBushes,
             })
             .expectNoErrors();
           createdBlock = response.data?.editBlock;
@@ -85,7 +103,7 @@ describe('block service', () => {
   });
 
   describe('find all', () => {
-    describe('given that there exists staff members', () => {
+    describe('given that there exists blocks', () => {
       describe('when getBlocks query is executed', () => {
         let blocks: Block[];
 
@@ -93,6 +111,7 @@ describe('block service', () => {
           const response = await request<{ getBlocks: Block[] }>(
             integrationTestManager.httpServer,
           )
+            .set('Authorization', `Bearer ${authToken}`)
             .query(gql`
               {
                 getBlocks {
@@ -123,17 +142,19 @@ describe('block service', () => {
           const response = await request<{ getBlock: Block }>(
             integrationTestManager.httpServer,
           )
+            .set('Authorization', `Bearer ${authToken}`)
             .query(gql`
-              query ($id: Float!) {
+              query ($id: String!) {
                 getBlock(id: $id) {
                   id
                   name
                   owner
+                  noOfBushes
                 }
               }
             `)
             .variables({
-              id: EditBlockStub.id,
+              id: createdBlockId,
             })
             .expectNoErrors();
           block = response.data?.getBlock;
@@ -157,15 +178,16 @@ describe('block service', () => {
           const response = await request<{ deactivate: Block }>(
             integrationTestManager.httpServer,
           )
+            .set('Authorization', `Bearer ${authToken}`)
             .mutate(gql`
-              mutation DeactivateBlock($id: Float!) {
+              mutation DeactivateBlock($id: String!) {
                 deactivate(id: $id) {
                   id
                 }
               }
             `)
             .variables({
-              id: EditBlockStub.id,
+              id: createdBlockId,
             })
             .expectNoErrors();
           deactivatedBlock = response.data?.deactivate;

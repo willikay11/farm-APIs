@@ -6,14 +6,23 @@ import {
   DeletedAt,
   ForeignKey,
   BelongsTo,
+  Default,
+  PrimaryKey,
 } from 'sequelize-typescript';
 import { StaffMember } from './staff.entity';
 
 @Table
 export class Payout extends Model<Payout> {
+  @PrimaryKey
+  @Default(DataType.UUIDV4) // auto-generate UUID
+  @Column({
+    type: DataType.UUID,
+  })
+  id: string;
+
   @ForeignKey(() => StaffMember)
-  @Column({ allowNull: false })
-  staffMemberId: number;
+  @Column({ type: DataType.UUID, allowNull: false })
+  staffMemberId: string;
 
   @Column({
     type: DataType.INTEGER,
@@ -32,7 +41,7 @@ export class Payout extends Model<Payout> {
     type: DataType.INTEGER,
     allowNull: true,
     defaultValue: 0,
-})
+  })
   huddleRate: number;
 
   @Column({

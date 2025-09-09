@@ -22,7 +22,7 @@ export class BlockService {
     return await this.blockRepository.findAll();
   }
 
-  async findById(id: number) {
+  async findById(id: string) {
     try {
       return await this.blockRepository.findOne<Block>({
         where: {
@@ -34,7 +34,7 @@ export class BlockService {
     }
   }
 
-  async edit(id: number, editBlock: CreateBlock) {
+  async edit(id: string, editBlock: CreateBlock) {
     try {
       const block = await this.blockRepository.findOne({
         where: {
@@ -47,13 +47,14 @@ export class BlockService {
       return block.update({
         name: editBlock.name,
         owner: editBlock.owner,
+        noOfBushes: editBlock.noOfBushes,
       });
     } catch (e) {
       throw new Error(e);
     }
   }
 
-  async deactivate(id: number) {
+  async deactivate(id: string) {
     try {
       return await this.blockRepository.destroy<Block>({
         where: {

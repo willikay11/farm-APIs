@@ -18,7 +18,7 @@ export class StaffResolver {
   constructor(private staffMemberService: StaffService) {}
 
   @Query(() => StaffMember)
-  async staffMember(@Args('id') id: string) {
+  async staffMember(@Args('id', { type: () => String }) id: string) {
     return await this.staffMemberService.findById(id);
   }
 
@@ -29,7 +29,7 @@ export class StaffResolver {
 
   @Mutation(() => StaffMember)
   async editMember(
-    @Args('id') id: number,
+    @Args('id', { type: () => String }) id: string,
     @Args('member') member: EditStaffMember,
   ) {
     return await this.staffMemberService.edit(id, member);
@@ -37,7 +37,7 @@ export class StaffResolver {
 
   @Mutation(() => Payout)
   async editPayout(
-    @Args('id') id: string,
+    @Args('id', { type: () => String }) id: string,
     @Args('payout') payout: CreatePayout,
   ) {
     return await this.staffMemberService.editPayout(id, payout);
@@ -49,7 +49,7 @@ export class StaffResolver {
   }
 
   @Mutation(() => StaffMember)
-  async deactivate(@Args('id') id: number) {
+  async deactivate(@Args('id', { type: () => String }) id: string) {
     return await this.staffMemberService.deactivate(id);
   }
 }

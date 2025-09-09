@@ -59,8 +59,8 @@ export class CreateExpense {
   narration: string;
 
   @Field({ nullable: true })
-  transactionId: number;
+  transactionId: string;
 
   @Field({ nullable: true })
-  staffMemberId: number;
+  staffMemberId: string;
 }

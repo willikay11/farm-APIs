@@ -7,6 +7,8 @@ import {
   ForeignKey,
   BelongsTo,
   HasMany,
+  Default,
+  PrimaryKey,
 } from 'sequelize-typescript';
 import { StaffMember } from '../../staff/entities/staff.entity';
 import { Block } from '../../block/entities/block.entity';
@@ -14,13 +16,20 @@ import { TransactionStatus } from './transactionStatus.entity';
 
 @Table
 export class Transaction extends Model<Transaction> {
+  @PrimaryKey
+  @Default(DataType.UUIDV4) // auto-generate UUID
+  @Column({
+    type: DataType.UUID,
+  })
+  id: string;
+
   @ForeignKey(() => StaffMember)
-  @Column({ allowNull: false })
-  staffMemberId: number;
+  @Column({ type: DataType.UUID, allowNull: false })
+  staffMemberId: string;
 
   @ForeignKey(() => Block)
-  @Column({ allowNull: false })
-  blockId: number;
+  @Column({ type: DataType.UUID, allowNull: false })
+  blockId: string;
 
   @Column({
     type: DataType.FLOAT,
