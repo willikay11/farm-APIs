@@ -10,7 +10,7 @@ export class BlockResolver {
   constructor(private blockService: BlockService) {}
 
   @Query(() => Block)
-  async getBlock(@Args('id') id: number) {
+  async getBlock(@Args('id', { type: () => String }) id: string) {
     return await this.blockService.findById(id);
   }
 
@@ -20,7 +20,10 @@ export class BlockResolver {
   }
 
   @Mutation(() => Block)
-  async editBlock(@Args('id') id: number, @Args('block') block: CreateBlock) {
+  async editBlock(
+    @Args('id', { type: () => String }) id: string,
+    @Args('block') block: CreateBlock,
+  ) {
     return await this.blockService.edit(id, block);
   }
 
@@ -30,7 +33,7 @@ export class BlockResolver {
   }
 
   @Mutation(() => Block)
-  async deactivate(@Args('id') id: number) {
+  async deactivate(@Args('id', { type: () => String }) id: string) {
     return await this.blockService.deactivate(id);
   }
 }

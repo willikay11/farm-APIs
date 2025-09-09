@@ -5,6 +5,8 @@ import {
   DataType,
   DeletedAt,
   HasMany,
+  Default,
+  PrimaryKey,
 } from 'sequelize-typescript';
 import { Payout } from './payout.entity';
 import { Block } from '../../block/entities/block.entity';
@@ -13,6 +15,13 @@ import { Target } from '../../target/entities/target.entity';
 
 @Table
 export class StaffMember extends Model<StaffMember> {
+  @PrimaryKey
+  @Default(DataType.UUIDV4) // auto-generate UUID
+  @Column({
+    type: DataType.UUID,
+  })
+  id: string;
+
   @Column({
     type: DataType.STRING,
     allowNull: false,

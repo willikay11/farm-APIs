@@ -1,10 +1,9 @@
 export const BlockStub = {
-  name: 'A',
-  owner: 1,
+  name: 'A1',
+  noOfBushes: 1900,
 };
 
 export const EditBlockStub = {
-  id: 14,
   name: 'A1',
-  owner: 1,
+  noOfBushes: 2100,
 };

@@ -1,4 +1,4 @@
 export class BlockDto {
   readonly name: string;
-  readonly owner: string;
+  readonly owner?: string;
 }

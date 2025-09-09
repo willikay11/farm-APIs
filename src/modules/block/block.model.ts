@@ -1,14 +1,17 @@
-import { Field, InputType, ObjectType } from '@nestjs/graphql';
+import { Field, InputType, Int, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()
 export class Block {
   @Field({ nullable: true })
-  id: number;
+  id: string;
 
   @Field()
   name: string;
 
   @Field()
+  noOfBushes: number;
+
+  @Field({ nullable: true })
   owner: number;
 
   @Field()
@@ -23,6 +26,9 @@ export class CreateBlock {
   @Field()
   name: string;
 
-  @Field()
-  owner: number;
+  @Field(() => Int)
+  noOfBushes: number;
+
+  @Field(() => String, { nullable: true })
+  owner?: string;
 }

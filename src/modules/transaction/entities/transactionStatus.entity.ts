@@ -5,15 +5,24 @@ import {
   DataType,
   ForeignKey,
   BelongsTo,
+  Default,
+  PrimaryKey,
 } from 'sequelize-typescript';
 import { Transaction } from './transaction.entity';
 import { TransactionStatusEnum } from '../enum';
 
 @Table
 export class TransactionStatus extends Model<TransactionStatus> {
+  @PrimaryKey
+  @Default(DataType.UUIDV4) // auto-generate UUID
+  @Column({
+    type: DataType.UUID,
+  })
+  id: string;
+
   @ForeignKey(() => Transaction)
-  @Column({ allowNull: false })
-  transactionId: number;
+  @Column({ type: DataType.UUID, allowNull: false })
+  transactionId: string;
 
   @Column({
     type: DataType.ENUM,

@@ -14,7 +14,6 @@ import { TargetModule } from './modules/target/target.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 
-console.log('DB_HOST:', process.env.DB_HOST)
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),

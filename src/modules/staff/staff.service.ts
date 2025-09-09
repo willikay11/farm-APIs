@@ -52,7 +52,7 @@ export class StaffService {
     }
   }
 
-  async edit(id: number, staffMember: EditStaffMember) {
+  async edit(id: string, staffMember: EditStaffMember) {
     try {
       const staff = await this.staffMemberRepository.findOne({
         where: {
@@ -107,7 +107,7 @@ export class StaffService {
     }
   }
 
-  async deactivate(id: number) {
+  async deactivate(id: string) {
     try {
       return await this.staffMemberRepository.destroy<StaffMember>({
         where: {

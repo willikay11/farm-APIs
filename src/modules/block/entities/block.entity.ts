@@ -7,15 +7,24 @@ import {
   ForeignKey,
   BelongsTo,
   HasMany,
+  Default,
+  PrimaryKey,
 } from 'sequelize-typescript';
 import { StaffMember } from '../../staff/entities/staff.entity';
 import { Transaction } from '../../transaction/entities/transaction.entity';
 
 @Table
 export class Block extends Model<Block> {
+  @PrimaryKey
+  @Default(DataType.UUIDV4) // auto-generate UUID
+  @Column({
+    type: DataType.UUID,
+  })
+  id: string;
+
   @ForeignKey(() => StaffMember)
-  @Column({ allowNull: false })
-  owner: number;
+  @Column({ type: DataType.UUID, allowNull: true })
+  owner: string;
 
   @Column({
     type: DataType.STRING,
@@ -23,11 +32,17 @@ export class Block extends Model<Block> {
   })
   name: string;
 
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: false,
+  })
+  noOfBushes: number;
+
   @DeletedAt
   declare deletedAt: Date | null;
 
   @BelongsTo(() => StaffMember)
-  staffMember: StaffMember;
+  staffMember?: StaffMember;
 
   @HasMany(() => Transaction)
   transactions: Transaction[];

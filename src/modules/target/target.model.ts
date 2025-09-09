@@ -37,5 +37,5 @@ export class CreateTarget {
   amount: number;
 
   @Field()
-  staffMemberId: number;
+  staffMemberId: string;
 }
