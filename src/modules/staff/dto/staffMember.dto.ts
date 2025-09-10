@@ -1,6 +1,6 @@
 export class StaffMemberDto {
   readonly name: string;
-  readonly idNumber: string;
+  readonly imageUrl: string;
   readonly type: string;
   readonly id?: string;
 }

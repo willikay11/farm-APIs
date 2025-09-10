@@ -50,9 +50,7 @@ describe('block service', () => {
         });
 
         test('the response should be the newly created block', () => {
-          expect(createdBlock).toMatchObject({
-            name: BlockStub.name,
-          });
+          expect(createdBlock.name).toBe(BlockStub.name);
         });
       });
     });
@@ -94,9 +92,7 @@ describe('block service', () => {
         });
 
         test('the response should be the edited block', () => {
-          expect(createdBlock).toMatchObject({
-            name: EditBlockStub.name,
-          });
+          expect(createdBlock.name).toBe(EditBlockStub.name);
         });
       });
     });

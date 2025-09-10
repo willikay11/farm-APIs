@@ -28,7 +28,7 @@ export class StaffService {
           {
             type: staffMember.type,
             name: staffMember.name,
-            idNumber: staffMember.idNumber,
+            imageUrl: staffMember.imageUrl,
           },
           { transaction: t },
         );
@@ -54,18 +54,44 @@ export class StaffService {
 
   async edit(id: string, staffMember: EditStaffMember) {
     try {
-      const staff = await this.staffMemberRepository.findOne({
-        where: {
-          id,
-        },
-      });
+      return await this.sequelize.transaction(async (t) => {
+        const staff = await this.staffMemberRepository.findOne({
+          where: {
+            id,
+          },
+        });
+  
+        if (!staff) return new BadRequestException('Staff member not found');
 
-      if (!staff) return new BadRequestException('Staff member not found');
+        const newStaff = await staff.update({
+          name: staffMember.name,
+          type: staffMember.type,
+          imageUrl: staffMember.imageUrl
+        });
 
-      return await staff.update({
-        idNumber: staffMember.idNumber,
-        name: staffMember.name,
-        type: staffMember.type,
+        await this.payoutRepository.destroy({
+          where: {
+            staffMemberId: staff.id,
+          },
+        });
+
+        const newPayout = await this.payoutRepository.create<Payout>(
+          {
+            staffMemberId: staff.id,
+            huddleRate: staffMember.huddleRate,
+            retainer: staffMember.retainer,
+            amountPerKg: staffMember.amountPerKg,
+            phoneNumber: staffMember.phoneNumber,
+          },
+          { transaction: t },
+        );
+
+        return {
+          ...newStaff.toJSON(),
+          payout: {
+            ...newPayout.toJSON()
+          }
+        };
       });
     } catch (e) {
       throw new Error(e);
@@ -131,6 +157,28 @@ export class StaffService {
   }
 
   async findAll() {
-    return await this.staffMemberRepository.findAll();
+    const staffMembers =  await this.staffMemberRepository.findAll({
+      include: [Payout]
+    });
+
+    return staffMembers.map((staffMember) => {
+      const payout = staffMember.payout[0];
+      return {
+        id: staffMember.id,
+        name: staffMember.name,
+        imageUrl: staffMember.imageUrl,
+        type: staffMember.type,
+        createdAt: staffMember.createdAt,
+        updatedAt: staffMember.updatedAt,
+        payout: {
+          id: payout.id,
+          huddleRate: payout.huddleRate,
+          amountPerKg: payout.amountPerKg,
+          retainer: payout.retainer,
+          createdAt: payout.createdAt,
+          updatedAt: payout.updatedAt,
+        }
+      }
+    })
   }
 }

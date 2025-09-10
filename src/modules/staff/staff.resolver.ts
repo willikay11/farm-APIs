@@ -9,8 +9,6 @@ import {
 import { StaffService } from './staff.service';
 import { GqlAuthGuard } from '../auth/jwt-auth.guard';
 import { UseGuards } from '@nestjs/common';
-// import { StaffMemberInterface } from "./interfaces/staff.interface";
-// import { StaffMemberDto } from "./dto/staffMember.dto";
 
 @Resolver()
 @UseGuards(GqlAuthGuard)
@@ -48,7 +46,7 @@ export class StaffResolver {
     return await this.staffMemberService.findAll();
   }
 
-  @Mutation(() => StaffMember)
+  @Mutation(() => StaffMember, { name: 'deactivateStaffMember' })
   async deactivate(@Args('id', { type: () => String }) id: string) {
     return await this.staffMemberService.deactivate(id);
   }

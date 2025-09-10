@@ -31,9 +31,8 @@ export class StaffMember extends Model<StaffMember> {
   @Column({
     type: DataType.STRING,
     allowNull: false,
-    unique: true,
   })
-  idNumber: string;
+  imageUrl: string;
 
   @Column({
     type: DataType.ENUM,

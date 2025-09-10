@@ -35,7 +35,8 @@ describe('staff service', () => {
               mutation CreateMember($createStaffMember: CreateStaffMember!) {
                 createMember(createStaffMember: $createStaffMember) {
                   id
-                  idNumber
+                  imageUrl
+                  name
                   type
                 }
               }
@@ -44,7 +45,7 @@ describe('staff service', () => {
               createStaffMember: {
                 name: StaffMemberStub.name,
                 type: StaffMemberStub.type,
-                idNumber: StaffMemberStub.idNumber,
+                imageUrl: StaffMemberStub.imageUrl,
                 retainer: StaffMemberStub.retainer,
                 phoneNumber: StaffMemberStub.phoneNumber,
                 huddleRate: StaffMemberStub.huddleRate,
@@ -57,9 +58,7 @@ describe('staff service', () => {
         });
 
         test('the response should be the newly created staff member', () => {
-          expect(createdStaffMember).toMatchObject({
-            idNumber: StaffMemberStub.idNumber,
-          });
+          expect(createdStaffMember.name).toBe(StaffMemberStub.name);
         });
       });
     });
@@ -78,7 +77,7 @@ describe('staff service', () => {
                 getStaffMembers {
                   id
                   name
-                  idNumber
+                  imageUrl
                   createdAt
                 }
               }
@@ -109,7 +108,7 @@ describe('staff service', () => {
                 staffMember(id: $id) {
                   id
                   name
-                  idNumber
+                  imageUrl
                 }
               }
             `)
@@ -143,15 +142,16 @@ describe('staff service', () => {
               mutation EditStaffMember(
                 $id: String!
                 $type: String!
-                $idNumber: String!
+                $imageUrl: String!
                 $name: String!
               ) {
                 editMember(
                   id: $id
-                  member: { name: $name, idNumber: $idNumber, type: $type }
+                  member: { name: $name, imageUrl: $imageUrl, type: $type }
                 ) {
                   id
-                  idNumber
+                  imageUrl
+                  name
                   type
                 }
               }
@@ -160,16 +160,14 @@ describe('staff service', () => {
               id: createdStaffMemberId,
               name: EditStaffMemberStub.name,
               type: EditStaffMemberStub.type,
-              idNumber: EditStaffMemberStub.idNumber,
+              imageUrl: EditStaffMemberStub.imageUrl,
             })
             .expectNoErrors();
           createdStaffMember = response.data?.editMember;
         });
 
         test('the response should be the edited staff member', () => {
-          expect(createdStaffMember).toMatchObject({
-            idNumber: EditStaffMemberStub.idNumber,
-          });
+          expect(createdStaffMember.name).toBe(EditStaffMemberStub.name);
         });
       });
     });
