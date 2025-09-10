@@ -1,25 +1,5 @@
 import { Field, InputType, ObjectType } from '@nestjs/graphql';
 
-@ObjectType()
-export class StaffMember {
-  @Field({ nullable: true })
-  id: string;
-
-  @Field()
-  name: string;
-
-  @Field()
-  idNumber: string;
-
-  @Field()
-  type: 'salaried' | 'day-bug';
-
-  @Field()
-  createdAt: string;
-
-  @Field()
-  updatedAt: string;
-}
 
 @ObjectType()
 export class Payout {
@@ -45,13 +25,37 @@ export class Payout {
   updatedAt: string;
 }
 
+@ObjectType()
+export class StaffMember {
+  @Field({ nullable: true })
+  id: string;
+
+  @Field()
+  name: string;
+
+  @Field()
+  imageUrl: string;
+
+  @Field()
+  type: 'salaried' | 'day-bug';
+
+  @Field()
+  createdAt: string;
+
+  @Field()
+  updatedAt: string;
+
+  @Field(() => Payout, { nullable: true })
+  payout?: Payout;
+}
+
 @InputType()
 export class CreateStaffMember {
   @Field()
   name: string;
 
   @Field()
-  idNumber: string;
+  imageUrl: string;
 
   @Field()
   type: 'salaried' | 'day-bug';
@@ -75,10 +79,22 @@ export class EditStaffMember {
   name: string;
 
   @Field()
-  idNumber: string;
+  imageUrl: string;
 
   @Field()
   type: 'salaried' | 'day-bug';
+
+  @Field()
+  retainer: number;
+
+  @Field({ nullable: true })
+  phoneNumber?: string;
+
+  @Field()
+  huddleRate: number;
+
+  @Field()
+  amountPerKg: number;
 }
 
 @InputType()
@@ -86,8 +102,8 @@ export class CreatePayout {
   @Field()
   retainer: number;
 
-  @Field()
-  phoneNumber: string;
+  @Field({ nullable: true })
+  phoneNumber?: string;
 
   @Field()
   huddleRate: number;

@@ -1,7 +1,7 @@
 export const StaffMemberStub = {
   name: 'Tilly Ensign',
   type: 'salaried',
-  idNumber: '19123133890294',
+  imageUrl: 'https://cdn.jsdelivr.net/gh/alohe/avatars/png/memo_3.png',
   retainer: 5000,
   phoneNumber: '+254706020933',
   huddleRate: 16,
@@ -12,7 +12,7 @@ export const EditStaffMemberStub = {
   id: 1,
   name: 'Tilly Ensign 443',
   type: 'salaried',
-  idNumber: '19123133890294',
+  imageUrl: 'https://cdn.jsdelivr.net/gh/alohe/avatars/png/memo_3.png',
   retainer: 5400,
   phoneNumber: '+254706020933',
   huddleRate: 16,
