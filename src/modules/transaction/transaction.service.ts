@@ -54,12 +54,21 @@ export class TransactionService {
   }
 
   async findAll() {
-    return await this.transactionRepository.findAll({
-      include: [Block, StaffMember],
+    const transactions = await this.transactionRepository.findAll({
+      include: [Block, StaffMember, TransactionStatus],
+    });
+
+    return transactions.map((transaction) => {
+      return {
+        ...transaction.toJSON(),
+        ...transaction.block.toJSON(),
+        ...transaction.staffMember.toJSON(),
+        status: transaction.transactionStatuses[0].status,
+      }
     });
   }
 
-  async findById(id: number) {
+  async findById(id: string) {
     try {
       return await this.transactionRepository.findOne<Transaction>({
         where: {
@@ -72,7 +81,7 @@ export class TransactionService {
     }
   }
 
-  async edit(id: number, editTransaction: CreateTransaction) {
+  async edit(id: string, editTransaction: CreateTransaction) {
     try {
       const transaction = await this.transactionRepository.findOne({
         where: {

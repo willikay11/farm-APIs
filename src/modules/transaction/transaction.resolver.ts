@@ -16,7 +16,7 @@ export class TransactionResolver {
   constructor(private transactionService: TransactionService) {}
 
   @Query(() => Transaction)
-  async getTransaction(@Args('id') id: number) {
+  async getTransaction(@Args('id') id: string) {
     return await this.transactionService.findById(id);
   }
 
@@ -27,7 +27,7 @@ export class TransactionResolver {
 
   @Mutation(() => Transaction)
   async editTransaction(
-    @Args('id') id: number,
+    @Args('id') id: string,
     @Args('transaction') transaction: CreateTransaction,
   ) {
     return await this.transactionService.edit(id, transaction);
