@@ -37,7 +37,7 @@ export class Transaction {
   @Field()
   amount: number;
 
-  @Field()
+  @Field({ nullable: true })
   status: string;
 
   @Field()

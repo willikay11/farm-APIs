@@ -53,13 +53,20 @@ export class TransactionService {
     }
   }
 
-  async findAll() {
+  async findAll(status?: TransactionStatusEnum) {
+    const where = {};
+
+    if (status) {
+      where['status'] = status;
+    }
+
     const transactions = await this.transactionRepository.findAll({
       include: [
         Block,
         StaffMember,
         {
           model: TransactionStatus,
+          where,
           separate: true,
           order: [['createdAt', 'DESC']],
         },
@@ -69,9 +76,9 @@ export class TransactionService {
     return transactions.map((transaction) => {
       return {
         ...transaction.toJSON(),
-        ...transaction.block.toJSON(),
-        ...transaction.staffMember.toJSON(),
-        status: transaction.transactionStatuses[0].status,
+        block: transaction.block.toJSON(),
+        staffMember: transaction.staffMember.toJSON(),
+        status: transaction.transactionStatuses[0]?.status,
       };
     });
   }

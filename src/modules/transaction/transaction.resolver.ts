@@ -9,6 +9,7 @@ import {
 } from './transaction.model';
 import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from '../auth/jwt-auth.guard';
+import { TransactionStatusEnum } from './enum';
 
 @Resolver()
 @UseGuards(GqlAuthGuard)
@@ -34,8 +35,11 @@ export class TransactionResolver {
   }
 
   @Query(() => [Transaction])
-  async getTransactions() {
-    return await this.transactionService.findAll();
+  async getTransactions(
+    @Args('status', { type: () => String, nullable: true })
+    status?: TransactionStatusEnum,
+  ) {
+    return await this.transactionService.findAll(status);
   }
 
   @Mutation(() => String)
