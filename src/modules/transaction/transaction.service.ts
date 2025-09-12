@@ -55,7 +55,15 @@ export class TransactionService {
 
   async findAll() {
     const transactions = await this.transactionRepository.findAll({
-      include: [Block, StaffMember, TransactionStatus],
+      include: [
+        Block,
+        StaffMember,
+        {
+          model: TransactionStatus,
+          separate: true,
+          order: [['createdAt', 'DESC']],
+        },
+      ],
     });
 
     return transactions.map((transaction) => {
@@ -64,7 +72,7 @@ export class TransactionService {
         ...transaction.block.toJSON(),
         ...transaction.staffMember.toJSON(),
         status: transaction.transactionStatuses[0].status,
-      }
+      };
     });
   }
 
@@ -157,9 +165,6 @@ export class TransactionService {
       await this.sequelize.transaction(async (t) => {
         await this.expenseRepository.bulkCreate(expenses, { transaction: t });
 
-        await this.transactionRepository.destroy({
-          where: { id: data.transactions },
-        });
         await this.transactionStatusRepository.bulkCreate(transactionStatuses, {
           transaction: t,
         });

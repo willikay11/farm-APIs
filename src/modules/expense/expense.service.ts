@@ -26,7 +26,7 @@ export class ExpenseService {
     });
   }
 
-  async findById(id: number) {
+  async findById(id: string) {
     try {
       return await this.expenseRepository.findOne<Expense>({
         where: {
