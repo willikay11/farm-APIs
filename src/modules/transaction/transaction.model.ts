@@ -19,10 +19,11 @@ export class TransactionStatus {
   @Field()
   updatedAt: string;
 }
+
 @ObjectType()
 export class Transaction {
   @Field()
-  id: number;
+  id: string;
 
   @Field()
   staffMember: StaffMember;
@@ -36,8 +37,8 @@ export class Transaction {
   @Field()
   amount: number;
 
-  @Field()
-  transaction: TransactionStatus;
+  @Field({ nullable: true })
+  status: string;
 
   @Field()
   createdAt: string;
@@ -83,8 +84,8 @@ export class CreateTransaction {
 
 @InputType()
 export class CheckoutTransactions {
-  @Field(() => [Number], {})
-  transactions: number[];
+  @Field(() => [String], {})
+  transactions: string[];
 
   @Field()
   date: string;

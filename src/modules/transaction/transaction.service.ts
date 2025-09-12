@@ -53,13 +53,37 @@ export class TransactionService {
     }
   }
 
-  async findAll() {
-    return await this.transactionRepository.findAll({
-      include: [Block, StaffMember],
+  async findAll(status?: TransactionStatusEnum) {
+    const where = {};
+
+    if (status) {
+      where['status'] = status;
+    }
+
+    const transactions = await this.transactionRepository.findAll({
+      include: [
+        Block,
+        StaffMember,
+        {
+          model: TransactionStatus,
+          where,
+          separate: true,
+          order: [['createdAt', 'DESC']],
+        },
+      ],
+    });
+
+    return transactions.map((transaction) => {
+      return {
+        ...transaction.toJSON(),
+        block: transaction.block.toJSON(),
+        staffMember: transaction.staffMember.toJSON(),
+        status: transaction.transactionStatuses[0]?.status,
+      };
     });
   }
 
-  async findById(id: number) {
+  async findById(id: string) {
     try {
       return await this.transactionRepository.findOne<Transaction>({
         where: {
@@ -72,7 +96,7 @@ export class TransactionService {
     }
   }
 
-  async edit(id: number, editTransaction: CreateTransaction) {
+  async edit(id: string, editTransaction: CreateTransaction) {
     try {
       const transaction = await this.transactionRepository.findOne({
         where: {
@@ -148,9 +172,6 @@ export class TransactionService {
       await this.sequelize.transaction(async (t) => {
         await this.expenseRepository.bulkCreate(expenses, { transaction: t });
 
-        await this.transactionRepository.destroy({
-          where: { id: data.transactions },
-        });
         await this.transactionStatusRepository.bulkCreate(transactionStatuses, {
           transaction: t,
         });

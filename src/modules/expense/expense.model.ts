@@ -5,7 +5,7 @@ import { StaffMember } from '../staff/staff.model';
 @ObjectType()
 export class Expense {
   @Field()
-  id: number;
+  id: string;
 
   @Field()
   type: string;

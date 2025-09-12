@@ -11,7 +11,7 @@ export class ExpenseResolver {
   constructor(private expenseService: ExpenseService) {}
 
   @Query(() => Expense)
-  async getExpense(@Args('id') id: number) {
+  async getExpense(@Args('id') id: string) {
     return await this.expenseService.findById(id);
   }
 

@@ -60,13 +60,13 @@ export class StaffService {
             id,
           },
         });
-  
+
         if (!staff) return new BadRequestException('Staff member not found');
 
         const newStaff = await staff.update({
           name: staffMember.name,
           type: staffMember.type,
-          imageUrl: staffMember.imageUrl
+          imageUrl: staffMember.imageUrl,
         });
 
         await this.payoutRepository.destroy({
@@ -89,8 +89,8 @@ export class StaffService {
         return {
           ...newStaff.toJSON(),
           payout: {
-            ...newPayout.toJSON()
-          }
+            ...newPayout.toJSON(),
+          },
         };
       });
     } catch (e) {
@@ -157,8 +157,8 @@ export class StaffService {
   }
 
   async findAll() {
-    const staffMembers =  await this.staffMemberRepository.findAll({
-      include: [Payout]
+    const staffMembers = await this.staffMemberRepository.findAll({
+      include: [Payout],
     });
 
     return staffMembers.map((staffMember) => {
@@ -177,8 +177,8 @@ export class StaffService {
           retainer: payout.retainer,
           createdAt: payout.createdAt,
           updatedAt: payout.updatedAt,
-        }
-      }
-    })
+        },
+      };
+    });
   }
 }
