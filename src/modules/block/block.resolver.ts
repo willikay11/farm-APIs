@@ -2,7 +2,7 @@ import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { BlockService } from './block.service';
 import { Block, CreateBlock } from './block.model';
 import { UseGuards } from '@nestjs/common';
-import { GqlAuthGuard } from '../auth/jwt-auth.guard';
+import { GqlAuthGuard } from '../auth/gql-jwt-auth.guard';
 
 @Resolver()
 @UseGuards(GqlAuthGuard)

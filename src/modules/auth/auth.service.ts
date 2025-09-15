@@ -11,6 +11,8 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
+  private blacklistedTokens: Set<string> = new Set(); // example; use Redis for production
+
   async validateUser(phoneNumber: string, password: string): Promise<any> {
     const user = await this.usersService.findOne(phoneNumber);
     if (!user) return null;
@@ -29,5 +31,16 @@ export class AuthService {
       name: user.name,
       accessToken: this.jwtService.sign(payload),
     };
+  }
+
+  async logout(user: any, authHeader: string) {
+    const token = authHeader?.split(' ')[1];
+    if (token) {
+      this.blacklistedTokens.add(token);
+    }
+  }
+
+  isTokenBlacklisted(token: string): boolean {
+    return this.blacklistedTokens.has(token);
   }
 }
