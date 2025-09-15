@@ -5,7 +5,7 @@ import { User } from './entities/user.entity';
 import { UserResolver } from './user.resolver';
 
 @Module({
-  imports: [SequelizeModule.forFeature([User])],
+  imports: [SequelizeModule.forFeature([User]),],
   providers: [UserService, UserResolver],
   exports: [UserService],
 })

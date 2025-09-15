@@ -7,7 +7,7 @@ import {
   StaffMember,
 } from './staff.model';
 import { StaffService } from './staff.service';
-import { GqlAuthGuard } from '../auth/jwt-auth.guard';
+import { GqlAuthGuard } from '../auth/gql-jwt-auth.guard';
 import { UseGuards } from '@nestjs/common';
 
 @Resolver()

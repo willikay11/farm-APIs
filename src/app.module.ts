@@ -13,6 +13,7 @@ import { ExpenseModule } from './modules/expense/expense.module';
 import { TargetModule } from './modules/target/target.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
+import { RedisModule } from './modules/redis/redis.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { UserModule } from './modules/user/user.module';
     TargetModule,
     AuthModule,
     UserModule,
+    RedisModule
   ],
   controllers: [AppController],
   providers: [AppService],

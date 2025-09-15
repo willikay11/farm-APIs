@@ -8,7 +8,7 @@ import {
   Transaction,
 } from './transaction.model';
 import { UseGuards } from '@nestjs/common';
-import { GqlAuthGuard } from '../auth/jwt-auth.guard';
+import { GqlAuthGuard } from '../auth/gql-jwt-auth.guard';
 import { TransactionStatusEnum } from './enum';
 
 @Resolver()

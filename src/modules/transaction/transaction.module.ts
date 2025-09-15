@@ -6,6 +6,7 @@ import { TransactionService } from './transaction.service';
 import { TransactionStatus } from './entities/transactionStatus.entity';
 import { Expense } from '../expense/entities/expense.entity';
 import { StaffMember } from '../staff/entities/staff.entity';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { StaffMember } from '../staff/entities/staff.entity';
       Expense,
       StaffMember,
     ]),
+    AuthModule,
   ],
   providers: [TransactionService, TransactionResolver],
 })
