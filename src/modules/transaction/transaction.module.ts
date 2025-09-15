@@ -16,7 +16,7 @@ import { AuthModule } from '../auth/auth.module';
       Expense,
       StaffMember,
     ]),
-    AuthModule
+    AuthModule,
   ],
   providers: [TransactionService, TransactionResolver],
 })

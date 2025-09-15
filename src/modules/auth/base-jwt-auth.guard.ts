@@ -1,4 +1,8 @@
-import { ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 
@@ -20,7 +24,7 @@ export abstract class BaseJwtAuthGuard extends AuthGuard('jwt') {
     const token = request.headers.authorization?.split(' ')[1];
 
     // Async blacklist check
-    if (token && await this.authService.isTokenBlacklisted(token)) {
+    if (token && (await this.authService.isTokenBlacklisted(token))) {
       throw new UnauthorizedException('Token has been logged out');
     }
 
