@@ -45,7 +45,7 @@ import { RedisModule } from './modules/redis/redis.module';
     TargetModule,
     AuthModule,
     UserModule,
-    RedisModule
+    RedisModule,
   ],
   controllers: [AppController],
   providers: [AppService],

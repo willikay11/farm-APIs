@@ -1,4 +1,11 @@
-import { Controller, Post, UseGuards, Request } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  UseGuards,
+  Request,
+  UnauthorizedException,
+  Body,
+} from '@nestjs/common';
 import { LocalAuthGuard } from './local-auth.guard';
 import { AuthService } from './auth.service';
 import { GqlAuthGuard } from './gql-jwt-auth.guard';
@@ -11,6 +18,15 @@ export class AuthController {
   @Post('login')
   async login(@Request() req) {
     return this.authService.login(req.user);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('refresh')
+  async refresh(@Body() body: { userId: string; refreshToken: string }, @Request() req) {
+    if (!body.userId || !body.refreshToken) {
+      throw new UnauthorizedException('Missing refresh data');
+    }
+    return this.authService.refreshTokens(body.userId, body.refreshToken, req.headers.authorization);
   }
 
   @UseGuards(JwtAuthGuard)
