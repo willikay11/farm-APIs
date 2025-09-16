@@ -28,7 +28,10 @@ export class TransactionStatus {
 @ObjectType()
 export class GroupedTransaction {
   @Field(() => String)
-  date: string; // e.g. "2025-09-16"
+  date: string;
+
+  @Field()
+  amount: number;
 
   @Field(() => [Transaction])
   transactions: Transaction[];

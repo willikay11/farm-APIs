@@ -128,6 +128,9 @@ export class TransactionService {
   // Convert object into array
   return Object.entries(grouped).map(([date, txns]) => ({
     date,
+    amount: txns.reduce((accumulator, currentValue) => {
+      return accumulator + currentValue.amount
+    }, 0),
     transactions: txns,
   }));
   }
