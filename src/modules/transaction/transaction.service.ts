@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import * as dayjs from 'dayjs';
 import { InjectModel } from '@nestjs/sequelize';
 import { Transaction } from './entities/transaction.entity';
 import { CheckoutTransactions, CreateTransaction } from './transaction.model';
@@ -71,6 +72,7 @@ export class TransactionService {
           order: [['createdAt', 'DESC']],
         },
       ],
+      order: [['createdAt', 'DESC']],
     });
 
     return transactions.map((transaction) => {
@@ -81,6 +83,53 @@ export class TransactionService {
         status: transaction.transactionStatuses[0]?.status,
       };
     });
+  }
+
+  async getGroupedTransactions(status?: TransactionStatusEnum) {
+    const where = {};
+
+    if (status) {
+      where['status'] = status;
+    }
+
+    const transactions = await this.transactionRepository.findAll({
+      include: [
+        Block,
+        StaffMember,
+        {
+          model: TransactionStatus,
+          where,
+          separate: true,
+          order: [['createdAt', 'DESC']],
+        },
+      ],
+      order: [['createdAt', 'DESC']]
+    });
+
+  // Transform into grouped structure
+  const grouped = transactions.reduce((acc, transaction) => {
+    const dateKey = dayjs(transaction.date).format('YYYY-MM-DD');
+
+    if (!acc[dateKey]) {
+      acc[dateKey] = [];
+    }
+
+    acc[dateKey].push({
+      ...transaction.toJSON(),
+      date: dayjs(transaction.date).toDate(),
+      block: transaction.block.toJSON(),
+      staffMember: transaction.staffMember.toJSON(),
+      status: transaction.transactionStatuses[0]?.status,
+    });
+
+    return acc;
+  }, {} as Record<string, any[]>);
+
+  // Convert object into array
+  return Object.entries(grouped).map(([date, txns]) => ({
+    date,
+    transactions: txns,
+  }));
   }
 
   async findById(id: string) {

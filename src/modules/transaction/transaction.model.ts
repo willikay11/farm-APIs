@@ -1,4 +1,9 @@
-import { Field, InputType, ObjectType } from '@nestjs/graphql';
+import {
+  Field,
+  InputType,
+  ObjectType,
+  GraphQLISODateTime,
+} from '@nestjs/graphql';
 import { StaffMember } from '../staff/staff.model';
 import { Block } from '../block/block.model';
 
@@ -21,6 +26,15 @@ export class TransactionStatus {
 }
 
 @ObjectType()
+export class GroupedTransaction {
+  @Field(() => String)
+  date: string; // e.g. "2025-09-16"
+
+  @Field(() => [Transaction])
+  transactions: Transaction[];
+}
+
+@ObjectType()
 export class Transaction {
   @Field()
   id: string;
@@ -31,8 +45,8 @@ export class Transaction {
   @Field()
   block: Block;
 
-  @Field()
-  date: string;
+  @Field(() => GraphQLISODateTime)
+  date: Date;
 
   @Field()
   amount: number;
@@ -40,11 +54,11 @@ export class Transaction {
   @Field({ nullable: true })
   status: string;
 
-  @Field()
-  createdAt: string;
+  @Field(() => GraphQLISODateTime)
+  createdAt: Date;
 
-  @Field()
-  updatedAt: string;
+  @Field(() => GraphQLISODateTime)
+  updatedAt: Date;
 }
 
 @ObjectType()
@@ -67,6 +81,7 @@ export class Progress {
   @Field()
   current: number;
 }
+
 @InputType()
 export class CreateTransaction {
   @Field()

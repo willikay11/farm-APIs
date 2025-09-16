@@ -19,7 +19,6 @@ export class AuthService {
       secret: process.env.SECRET_CODE,
       expiresIn: '15m', // shorter lived access token
     });
-
   }
 
   async generateRefreshToken(payload: any) {
@@ -47,7 +46,11 @@ export class AuthService {
     return stored === refreshToken;
   }
 
-  async refreshTokens(userId: string, refreshToken: string, authHeader: string) {
+  async refreshTokens(
+    userId: string,
+    refreshToken: string,
+    authHeader: string,
+  ) {
     // Verify refresh token signature
     try {
       this.jwtService.verify(refreshToken, {
@@ -76,7 +79,7 @@ export class AuthService {
     // await this.storeRefreshToken(userId, newRefreshToken);
 
     return {
-      accessToken: accessToken
+      accessToken: accessToken,
     };
   }
 
@@ -111,10 +114,10 @@ export class AuthService {
   async logout(user: any, authHeader: string) {
     const token = authHeader?.split(' ')[1];
     if (!token) return;
-  
+
     // blacklist access token
     await this.blackListAccessToken(token);
-    
+
     // remove refresh token for this user
     if (user?.id) {
       await this.redisClient.del(`refresh:${user.id}`);
@@ -130,7 +133,7 @@ export class AuthService {
     const ttl = payload?.exp
       ? payload.exp - Math.floor(Date.now() / 1000)
       : 86400;
-  
+
     await this.redisClient.set(`bl:${token}`, '1', 'EX', ttl);
   }
 }

@@ -34,6 +34,7 @@
     "@types/passport-local": "^1.0.38",
     "@types/sequelize": "^4.28.19",
     "bcrypt": "^5.1.1",
+    "dayjs": "^1.11.18",
     "dotenv": "^16.3.1",
     "graphql": "^16.8.1",
     "graphql-tag": "^2.12.6",

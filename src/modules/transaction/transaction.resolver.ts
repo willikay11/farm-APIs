@@ -3,6 +3,7 @@ import { TransactionService } from './transaction.service';
 import {
   CheckoutTransactions,
   CreateTransaction,
+  GroupedTransaction,
   Progress,
   StaffProgress,
   Transaction,
@@ -40,6 +41,14 @@ export class TransactionResolver {
     status?: TransactionStatusEnum,
   ) {
     return await this.transactionService.findAll(status);
+  }
+
+  @Query(() => [GroupedTransaction])
+  async getGroupedTransactions(
+    @Args('status', { type: () => String, nullable: true })
+    status?: TransactionStatusEnum,
+  ) {
+    return await this.transactionService.getGroupedTransactions(status);
   }
 
   @Mutation(() => String)
