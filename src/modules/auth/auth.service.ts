@@ -17,7 +17,7 @@ export class AuthService {
   async generateAccessToken(payload: any) {
     return this.jwtService.sign(payload, {
       secret: process.env.SECRET_CODE,
-      expiresIn: '15m', // shorter lived access token
+      expiresIn: '5m', // shorter lived access token
     });
   }
 
@@ -107,6 +107,7 @@ export class AuthService {
       id: user.id,
       name: user.name,
       accessToken: accessToken,
+      expiresIn: 5 * 60,
       refreshToken: refreshToken,
     };
   }

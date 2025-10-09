@@ -54,6 +54,30 @@ export class TransactionService {
     }
   }
 
+  async createMultiple(transactions: CreateTransaction[]) {
+    try {
+      return this.sequelize.transaction(async (t) => {
+        const newTransactions = await this.transactionRepository.bulkCreate<Transaction>(transactions, {
+          transaction: t
+        });
+        
+        newTransactions.forEach(async(newTransaction) => {
+          await this.transactionStatusRepository.create(
+            {
+              transactionId: newTransaction.id,
+              status: TransactionStatusEnum.PENDING,
+            },
+            { transaction: t },
+          );
+        });
+
+        return newTransactions;
+      });
+    } catch(e) {
+      throw new Error(e)
+    }
+  }
+
   async findAll(status?: TransactionStatusEnum) {
     const where = {};
 
@@ -93,6 +117,12 @@ export class TransactionService {
     }
 
     const transactions = await this.transactionRepository.findAll({
+      where: {
+        date: {
+          [Op.gte]: dayjs().startOf('month').toDate(),
+          [Op.lte]: dayjs().endOf('month').toDate(),
+        }
+      },
       include: [
         Block,
         StaffMember,
@@ -103,36 +133,44 @@ export class TransactionService {
           order: [['createdAt', 'DESC']],
         },
       ],
-      order: [['createdAt', 'DESC']]
+      order: [['createdAt', 'DESC']],
     });
 
-  // Transform into grouped structure
-  const grouped = transactions.reduce((acc, transaction) => {
-    const dateKey = dayjs(transaction.date).format('YYYY-MM-DD');
+    // Transform into grouped structure
+    const grouped = transactions.reduce(
+      (acc, transaction) => {
+        const dateKey = dayjs(transaction.date).format('YYYY-MM-DD');
 
-    if (!acc[dateKey]) {
-      acc[dateKey] = [];
-    }
+        if (!acc[dateKey]) {
+          acc[dateKey] = [];
+        }
 
-    acc[dateKey].push({
-      ...transaction.toJSON(),
-      date: dayjs(transaction.date).toDate(),
-      block: transaction.block.toJSON(),
-      staffMember: transaction.staffMember.toJSON(),
-      status: transaction.transactionStatuses[0]?.status,
-    });
+        acc[dateKey].push({
+          ...transaction.toJSON(),
+          date: dayjs(transaction.date).toDate(),
+          block: transaction.block.toJSON(),
+          staffMember: transaction.staffMember.toJSON(),
+          status: transaction.transactionStatuses[0]?.status,
+        });
 
-    return acc;
-  }, {} as Record<string, any[]>);
+        return acc;
+      },
+      {} as Record<string, any[]>,
+    );
 
-  // Convert object into array
-  return Object.entries(grouped).map(([date, txns]) => ({
-    date,
-    amount: txns.reduce((accumulator, currentValue) => {
-      return accumulator + currentValue.amount
-    }, 0),
-    transactions: txns,
-  }));
+    // Convert object into array
+    return Object.entries(grouped)
+      .sort(
+        ([dateA], [dateB]) =>
+          new Date(dateB).getTime() - new Date(dateA).getTime(),
+      )
+      .map(([date, txns]) => ({
+        date,
+        amount: txns.reduce((accumulator, currentValue) => {
+          return accumulator + currentValue.amount;
+        }, 0),
+        transactions: txns,
+      }));
   }
 
   async findById(id: string) {

@@ -27,6 +27,14 @@ export class TransactionResolver {
     return await this.transactionService.create(transaction);
   }
 
+  @Mutation(() => [Transaction])
+  async createTransactions(
+    @Args({ name: 'transactions', type: () => [CreateTransaction] })
+    transactions: CreateTransaction[],
+  ) {
+    return await this.transactionService.createMultiple(transactions);
+  }
+
   @Mutation(() => Transaction)
   async editTransaction(
     @Args('id') id: string,
