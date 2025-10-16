@@ -12,6 +12,7 @@ import { StaffMember } from '../staff/entities/staff.entity';
 import { Expense } from '../expense/entities/expense.entity';
 import { Payout } from '../staff/entities/payout.entity';
 import { Target } from '../target/entities/target.entity';
+import { TransactionFromAutomationDto } from './dto/transaction.dto';
 
 @Injectable()
 export class TransactionService {
@@ -29,6 +30,9 @@ export class TransactionService {
 
     @InjectModel(StaffMember)
     private readonly staffMemberRepository: typeof StaffMember,
+
+    @InjectModel(Block)
+    private readonly blockRepository: typeof Block,
   ) {}
 
   async create(transaction: CreateTransaction) {
@@ -51,6 +55,30 @@ export class TransactionService {
       });
     } catch (e) {
       throw new Error(e);
+    }
+  }
+
+  async createMultiple(transactions: CreateTransaction[]) {
+    try {
+      return this.sequelize.transaction(async (t) => {
+        const newTransactions = await this.transactionRepository.bulkCreate<Transaction>(transactions, {
+          transaction: t
+        });
+        
+        newTransactions.forEach(async(newTransaction) => {
+          await this.transactionStatusRepository.create(
+            {
+              transactionId: newTransaction.id,
+              status: TransactionStatusEnum.PENDING,
+            },
+            { transaction: t },
+          );
+        });
+
+        return newTransactions;
+      });
+    } catch(e) {
+      throw new Error(e)
     }
   }
 
@@ -93,6 +121,12 @@ export class TransactionService {
     }
 
     const transactions = await this.transactionRepository.findAll({
+      where: {
+        date: {
+          [Op.gte]: dayjs().startOf('month').toDate(),
+          [Op.lte]: dayjs().endOf('month').toDate(),
+        }
+      },
       include: [
         Block,
         StaffMember,
@@ -103,36 +137,44 @@ export class TransactionService {
           order: [['createdAt', 'DESC']],
         },
       ],
-      order: [['createdAt', 'DESC']]
+      order: [['createdAt', 'DESC']],
     });
 
-  // Transform into grouped structure
-  const grouped = transactions.reduce((acc, transaction) => {
-    const dateKey = dayjs(transaction.date).format('YYYY-MM-DD');
+    // Transform into grouped structure
+    const grouped = transactions.reduce(
+      (acc, transaction) => {
+        const dateKey = dayjs(transaction.date).format('YYYY-MM-DD');
 
-    if (!acc[dateKey]) {
-      acc[dateKey] = [];
-    }
+        if (!acc[dateKey]) {
+          acc[dateKey] = [];
+        }
 
-    acc[dateKey].push({
-      ...transaction.toJSON(),
-      date: dayjs(transaction.date).toDate(),
-      block: transaction.block.toJSON(),
-      staffMember: transaction.staffMember.toJSON(),
-      status: transaction.transactionStatuses[0]?.status,
-    });
+        acc[dateKey].push({
+          ...transaction.toJSON(),
+          date: dayjs(transaction.date).toDate(),
+          block: transaction.block.toJSON(),
+          staffMember: transaction.staffMember.toJSON(),
+          status: transaction.transactionStatuses[0]?.status,
+        });
 
-    return acc;
-  }, {} as Record<string, any[]>);
+        return acc;
+      },
+      {} as Record<string, any[]>,
+    );
 
-  // Convert object into array
-  return Object.entries(grouped).map(([date, txns]) => ({
-    date,
-    amount: txns.reduce((accumulator, currentValue) => {
-      return accumulator + currentValue.amount
-    }, 0),
-    transactions: txns,
-  }));
+    // Convert object into array
+    return Object.entries(grouped)
+      .sort(
+        ([dateA], [dateB]) =>
+          new Date(dateB).getTime() - new Date(dateA).getTime(),
+      )
+      .map(([date, txns]) => ({
+        date,
+        amount: txns.reduce((accumulator, currentValue) => {
+          return accumulator + currentValue.amount;
+        }, 0),
+        transactions: txns,
+      }));
   }
 
   async findById(id: string) {
@@ -346,6 +388,63 @@ export class TransactionService {
     } catch (e) {
       throw new Error(e);
     }
+  }
+
+  async addTransactionFromAutomation(data: TransactionFromAutomationDto) {
+    // Step 1: Search for the receipt number
+    const transaction = await this.transactionRepository.findOne({
+      where: {
+        receiptNo: data.receipt_no
+      }
+    });
+
+    if(transaction) return;
+
+    // Step 2: Start reconciliation by checking if the total net_weight_kg in the bags array matches the tea_weight_kg in the totals object
+    const totalKgsInReceipt = data.bags.reduce(( previousValue, currentValue) => previousValue + parseFloat(currentValue.net_weight_kg), 0);
+
+    if(totalKgsInReceipt !== parseFloat(data.totals.tea_weight_kg)) return;
+
+    // Step 3: Search for the block
+    const block = await this.blockRepository.findOne({
+      where: {
+        name: data.block
+      }
+    })
+    // Step 4: Search for the picker
+    const staffMember = await this.staffMemberRepository.findOne({
+      where: {
+        name: data.picker
+      }
+    });
+
+    // Step 5: Format date to remove the time and second
+    const date = dayjs(data.plucked_date).startOf('D').format('YYYY-MM-DD');
+
+    // Step 6: Save to DB
+    this.sequelize.transaction(async (t) => {
+      const newTransaction =
+      await this.transactionRepository.create<Transaction>({
+        staffMemberId: staffMember.id,
+        receiptNo: data.receipt_no,
+        date: date,
+        blockId: block.id,
+        amount: totalKgsInReceipt
+      }, {
+        transaction: t,
+      });
+
+    await this.transactionStatusRepository.create(
+      {
+        transactionId: newTransaction.id,
+        status: TransactionStatusEnum.PENDING,
+      },
+      { transaction: t },
+    );
+
+    return newTransaction;
+    })
+
   }
 
   private calculateAmount(amount: number, payout: Payout) {
