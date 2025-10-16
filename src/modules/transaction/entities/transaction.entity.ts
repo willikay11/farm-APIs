@@ -43,6 +43,12 @@ export class Transaction extends Model<Transaction> {
   })
   date: string;
 
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  receiptNo: string;
+
   @DeletedAt
   declare deletedAt: Date | null;
 
