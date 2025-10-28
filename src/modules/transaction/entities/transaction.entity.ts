@@ -24,22 +24,22 @@ export class Transaction extends Model<Transaction> {
   id: string;
 
   @ForeignKey(() => StaffMember)
-  @Column({ type: DataType.UUID, allowNull: false })
+  @Column({ type: DataType.UUID, allowNull: true })
   staffMemberId: string;
 
   @ForeignKey(() => Block)
-  @Column({ type: DataType.UUID, allowNull: false })
+  @Column({ type: DataType.UUID, allowNull: true })
   blockId: string;
 
   @Column({
     type: DataType.FLOAT,
-    allowNull: false,
+    allowNull: true,
   })
   amount: number;
 
   @Column({
     type: DataType.DATE,
-    allowNull: false,
+    allowNull: true,
   })
   date: string;
 

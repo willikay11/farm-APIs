@@ -260,7 +260,7 @@ export class TransactionService {
 
       const transactionStatuses = transactions?.map((transaction) => ({
         transactionId: transaction?.id,
-        status: TransactionStatusEnum.SENT,
+        status: TransactionStatusEnum.PAID,
       }));
 
       await this.sequelize.transaction(async (t) => {
@@ -391,60 +391,95 @@ export class TransactionService {
   }
 
   async addTransactionFromAutomation(data: TransactionFromAutomationDto) {
-    // Step 1: Search for the receipt number
-    const transaction = await this.transactionRepository.findOne({
-      where: {
-        receiptNo: data.receipt_no
-      }
-    });
+    try {
+      const errors: string[] = [];
 
-    if(transaction) return;
-
-    // Step 2: Start reconciliation by checking if the total net_weight_kg in the bags array matches the tea_weight_kg in the totals object
-    const totalKgsInReceipt = data.bags.reduce(( previousValue, currentValue) => previousValue + parseFloat(currentValue.net_weight_kg), 0);
-
-    if(totalKgsInReceipt !== parseFloat(data.totals.tea_weight_kg)) return;
-
-    // Step 3: Search for the block
-    const block = await this.blockRepository.findOne({
-      where: {
-        name: data.block
-      }
-    })
-    // Step 4: Search for the picker
-    const staffMember = await this.staffMemberRepository.findOne({
-      where: {
-        name: data.picker
-      }
-    });
-
-    // Step 5: Format date to remove the time and second
-    const date = dayjs(data.plucked_date).startOf('D').format('YYYY-MM-DD');
-
-    // Step 6: Save to DB
-    this.sequelize.transaction(async (t) => {
-      const newTransaction =
-      await this.transactionRepository.create<Transaction>({
-        staffMemberId: staffMember.id,
-        receiptNo: data.receipt_no,
-        date: date,
-        blockId: block.id,
-        amount: totalKgsInReceipt
-      }, {
-        transaction: t,
+      // Step 1: Search for the receipt number
+      const transaction = await this.transactionRepository.findOne({
+        where: {
+          receiptNo: data.receipt_no
+        }
       });
 
-    await this.transactionStatusRepository.create(
-      {
-        transactionId: newTransaction.id,
-        status: TransactionStatusEnum.PENDING,
-      },
-      { transaction: t },
-    );
+      if(transaction) return;
 
-    return newTransaction;
-    })
+      // Step 2: Start reconciliation by checking if the total net_weight_kg in the bags array matches the tea_weight_kg in the totals object
+      const totalKgsInReceipt = data.bags.reduce(( previousValue, currentValue) => previousValue + parseFloat(currentValue.net_weight_kg), 0);
 
+      if(totalKgsInReceipt !== parseFloat(data.totals.tea_weight_kg)) {
+        errors.push(`Net picked kgs (${totalKgsInReceipt}) for this receipt does not match tea weight in kgs (${data.totals.tea_weight_kg})`);
+      }
+
+      // Step 3: Search for the block
+      const block = await this.blockRepository.findOne({
+        where: {
+          name: data.block
+        }
+      });
+
+      if(!block) {
+        errors.push(`Block ${data.block} not found`);
+
+      }
+      // Step 4: Search for the picker
+      const staffMember = await this.staffMemberRepository.findOne({
+        where: {
+          name: { [Op.iLike]: data.picker } // case-insensitive match
+        }
+      });
+
+      if(!staffMember) {
+        errors.push(`Staff ${data.picker} not found`);
+      }
+
+      // Step 5: Format date to remove the time and second
+      const date = dayjs(data.plucked_date).startOf('D').format('YYYY-MM-DD');
+
+      if(date.toLocaleLowerCase() === 'invalid date') {
+        errors.push(`Invalid date: ${data.plucked_date}`);
+      }
+
+      if (Number.isNaN(totalKgsInReceipt)) {
+        errors.push(`Invalid amount ${totalKgsInReceipt}`);
+      }
+      console.log({
+        staffMemberId: staffMember?.id,
+        receiptNo: data.receipt_no,
+        date: date.toLocaleLowerCase() === 'invalid date' ? null : date,
+        blockId: block?.id,
+        amount: Number.isNaN(totalKgsInReceipt) ? 0 : totalKgsInReceipt
+      })
+      
+      // Step 6: Save to DB
+      this.sequelize.transaction(async (t) => {
+        const newTransaction =
+        await this.transactionRepository.create<Transaction>({
+          staffMemberId: staffMember?.id,
+          receiptNo: data.receipt_no,
+          date: date.toLocaleLowerCase() === 'invalid date' ? null : date,
+          blockId: block?.id,
+          amount: Number.isNaN(totalKgsInReceipt) ? 0 : totalKgsInReceipt
+        }, {
+          transaction: t,
+        });
+
+      await this.transactionStatusRepository.create(
+        {
+          transactionId: newTransaction.id,
+          status: errors.length ? TransactionStatusEnum.NEEDS_INTERVENTION : TransactionStatusEnum.PENDING,
+          errors: errors,
+        },
+        { transaction: t },
+      );
+
+
+        return newTransaction;
+      });
+
+    } catch(e) {
+      console.log(e);
+      throw new Error(e);
+    }
   }
 
   private calculateAmount(amount: number, payout: Payout) {

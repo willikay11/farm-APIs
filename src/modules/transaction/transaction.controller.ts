@@ -15,4 +15,10 @@ export class TransactionController {
         await this.transactionService.addTransactionFromAutomation(data);
         return;
     }
+
+    @Post('test')
+    async testEndpoint(@Body() data: any) {
+        console.log('Test endpoint received data:', data);
+        return { message: 'Test endpoint received data successfully' };
+    }
 }

@@ -29,13 +29,20 @@ export class TransactionStatus extends Model<TransactionStatus> {
     values: [
       TransactionStatusEnum.PENDING,
       TransactionStatusEnum.PROCESSING,
-      TransactionStatusEnum.SENT,
+      TransactionStatusEnum.PAID,
       TransactionStatusEnum.FAILED,
+      TransactionStatusEnum.NEEDS_INTERVENTION
     ],
     defaultValue: TransactionStatusEnum.PENDING,
     allowNull: false,
   })
   status: string;
+
+  @Column({
+    type: DataType.JSONB,
+    allowNull: true
+  })
+  errors: string[]
 
   @BelongsTo(() => Transaction)
   transaction: Transaction;

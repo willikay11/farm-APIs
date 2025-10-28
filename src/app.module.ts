@@ -14,6 +14,7 @@ import { TargetModule } from './modules/target/target.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import { RedisModule } from './modules/redis/redis.module';
+import { ReceiptModule } from './modules/receipts/receipt.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { RedisModule } from './modules/redis/redis.module';
     AuthModule,
     UserModule,
     RedisModule,
+    ReceiptModule,
   ],
   controllers: [AppController],
   providers: [AppService],

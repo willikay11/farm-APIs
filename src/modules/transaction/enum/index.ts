@@ -1,6 +1,7 @@
 export enum TransactionStatusEnum {
   PENDING = 'PENDING',
   PROCESSING = 'PROCESSING',
-  SENT = 'SENT',
+  NEEDS_INTERVENTION = 'NEEDS_INTERVENTION',
+  PAID = 'PAID',
   FAILED = 'FAILED',
 }
