@@ -13,6 +13,7 @@ import {
 import { StaffMember } from '../../staff/entities/staff.entity';
 import { Block } from '../../block/entities/block.entity';
 import { TransactionStatus } from './transactionStatus.entity';
+import { Receipt } from 'src/modules/receipts/entities/receipt.entity';
 
 @Table
 export class Transaction extends Model<Transaction> {
@@ -24,22 +25,26 @@ export class Transaction extends Model<Transaction> {
   id: string;
 
   @ForeignKey(() => StaffMember)
-  @Column({ type: DataType.UUID, allowNull: false })
+  @Column({ type: DataType.UUID, allowNull: true })
   staffMemberId: string;
 
   @ForeignKey(() => Block)
-  @Column({ type: DataType.UUID, allowNull: false })
+  @Column({ type: DataType.UUID, allowNull: true })
   blockId: string;
+
+  @ForeignKey(() => Receipt)
+  @Column({ type: DataType.UUID, allowNull: true })
+  receiptId: string;
 
   @Column({
     type: DataType.FLOAT,
-    allowNull: false,
+    allowNull: true,
   })
   amount: number;
 
   @Column({
     type: DataType.DATE,
-    allowNull: false,
+    allowNull: true,
   })
   date: string;
 
@@ -51,6 +56,9 @@ export class Transaction extends Model<Transaction> {
 
   @DeletedAt
   declare deletedAt: Date | null;
+
+  @BelongsTo(() => Receipt)
+  receipt?: Receipt;
 
   @BelongsTo(() => StaffMember)
   staffMember: StaffMember;

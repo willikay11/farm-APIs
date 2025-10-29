@@ -1,18 +1,20 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import * as dayjs from 'dayjs';
+import axios from 'axios';
 import { InjectModel } from '@nestjs/sequelize';
 import { Transaction } from './entities/transaction.entity';
 import { CheckoutTransactions, CreateTransaction } from './transaction.model';
 import { Sequelize } from 'sequelize-typescript';
 import { Op } from 'sequelize';
 import { TransactionStatus } from './entities/transactionStatus.entity';
-import { TransactionStatusEnum } from './enum';
+import { ReceiptStatusEnum, TransactionStatusEnum } from './enum';
 import { Block } from '../block/entities/block.entity';
 import { StaffMember } from '../staff/entities/staff.entity';
 import { Expense } from '../expense/entities/expense.entity';
 import { Payout } from '../staff/entities/payout.entity';
 import { Target } from '../target/entities/target.entity';
 import { TransactionFromAutomationDto } from './dto/transaction.dto';
+import { Receipt } from '../receipts/entities/receipt.entity';
 
 @Injectable()
 export class TransactionService {
@@ -33,6 +35,9 @@ export class TransactionService {
 
     @InjectModel(Block)
     private readonly blockRepository: typeof Block,
+
+    @InjectModel(Receipt)
+    private readonly receiptRepository: typeof Receipt
   ) {}
 
   async create(transaction: CreateTransaction) {
@@ -260,7 +265,7 @@ export class TransactionService {
 
       const transactionStatuses = transactions?.map((transaction) => ({
         transactionId: transaction?.id,
-        status: TransactionStatusEnum.SENT,
+        status: TransactionStatusEnum.PAID,
       }));
 
       await this.sequelize.transaction(async (t) => {
@@ -390,66 +395,156 @@ export class TransactionService {
     }
   }
 
-  async addTransactionFromAutomation(data: TransactionFromAutomationDto) {
-    // Step 1: Search for the receipt number
-    const transaction = await this.transactionRepository.findOne({
-      where: {
-        receiptNo: data.receipt_no
-      }
-    });
-
-    if(transaction) return;
-
-    // Step 2: Start reconciliation by checking if the total net_weight_kg in the bags array matches the tea_weight_kg in the totals object
-    const totalKgsInReceipt = data.bags.reduce(( previousValue, currentValue) => previousValue + parseFloat(currentValue.net_weight_kg), 0);
-
-    if(totalKgsInReceipt !== parseFloat(data.totals.tea_weight_kg)) return;
-
-    // Step 3: Search for the block
-    const block = await this.blockRepository.findOne({
-      where: {
-        name: data.block
-      }
-    })
-    // Step 4: Search for the picker
-    const staffMember = await this.staffMemberRepository.findOne({
-      where: {
-        name: data.picker
-      }
-    });
-
-    // Step 5: Format date to remove the time and second
-    const date = dayjs(data.plucked_date).startOf('D').format('YYYY-MM-DD');
-
-    // Step 6: Save to DB
-    this.sequelize.transaction(async (t) => {
-      const newTransaction =
-      await this.transactionRepository.create<Transaction>({
-        staffMemberId: staffMember.id,
-        receiptNo: data.receipt_no,
-        date: date,
-        blockId: block.id,
-        amount: totalKgsInReceipt
-      }, {
-        transaction: t,
+  async triggerAutomation() {
+    console.log('Automation triggered');
+    try {
+      const receipts = await this.receiptRepository.findAll({
+        where: {
+          status: ReceiptStatusEnum.PENDING
+        }
       });
 
-    await this.transactionStatusRepository.create(
-      {
-        transactionId: newTransaction.id,
-        status: TransactionStatusEnum.PENDING,
-      },
-      { transaction: t },
-    );
+      for(const receipt of receipts) {
+        setTimeout(async () => {
+          console.log('Processing receipt:', receipt.id);
+          await axios.post('https://dae7df764d7c.ngrok-free.app/webhook/1565f825-4eb6-4ed7-b030-c9d16fe6a1ec', {
+            receiptId: receipt.id,
+            fileKey: this.extractFilenameFromUrl(receipt.fileUrl)
+          });
+        }, 3000);
+      }
+      return { message: 'Automation triggered' };
+    } catch (e) {
+      console.error('Error during automation:', e);
+    }
+}
 
-    return newTransaction;
-    })
+  async addTransactionFromAutomation(data: TransactionFromAutomationDto, receiptId: string) {
+    try {
+      const errors: string[] = [];
+  
+      // Step 1: Search for the receipt number
+      const transaction = await this.transactionRepository.findOne({
+        where: {
+          receiptNo: data?.receipt_no
+        }
+      });
 
+      if(transaction) return;
+
+      // Step 2: Start reconciliation by checking if the total net_weight_kg in the bags array matches the tea_weight_kg in the totals object
+      const totalKgsInReceipt = data.bags.reduce(( previousValue, currentValue) => previousValue + parseFloat(currentValue.net_weight_kg), 0);
+
+      if(totalKgsInReceipt !== parseFloat(data.totals.tea_weight_kg)) {
+        errors.push(`Net picked kgs (${totalKgsInReceipt}) for this receipt does not match tea weight in kgs (${data.totals.tea_weight_kg})`);
+      }
+
+      // Step 3: Search for the block
+      const block = await this.blockRepository.findOne({
+        where: {
+          name: data.block
+        }
+      });
+
+      if(!block) {
+        errors.push(`Block ${data.block} not found`);
+
+      }
+      // Step 4: Search for the picker
+      const staffMember = await this.staffMemberRepository.findOne({
+        where: {
+          name: { [Op.iLike]: data.picker } // case-insensitive match
+        }
+      });
+
+      if(!staffMember) {
+        errors.push(`Staff ${data.picker} not found`);
+      }
+
+      // Step 5: Format date to remove the time and second
+      const date = dayjs(data.plucked_date).startOf('D').format('YYYY-MM-DD');
+
+      if(date.toLocaleLowerCase() === 'invalid date') {
+        errors.push(`Invalid date: ${data.plucked_date}`);
+      }
+
+      if (Number.isNaN(totalKgsInReceipt)) {
+        errors.push(`Invalid amount ${totalKgsInReceipt}`);
+      }
+      console.log({
+        staffMemberId: staffMember?.id,
+        receiptNo: data.receipt_no,
+        date: date.toLocaleLowerCase() === 'invalid date' ? null : date,
+        blockId: block?.id,
+        amount: Number.isNaN(totalKgsInReceipt) ? 0 : totalKgsInReceipt
+      })
+      
+      // Step 6: Save to DB
+      this.sequelize.transaction(async (t) => {
+        const newTransaction =
+        await this.transactionRepository.create<Transaction>({
+          receiptId: receiptId,
+          staffMemberId: staffMember?.id,
+          receiptNo: data.receipt_no,
+          date: date.toLocaleLowerCase() === 'invalid date' ? null : date,
+          blockId: block?.id,
+          amount: Number.isNaN(totalKgsInReceipt) ? 0 : totalKgsInReceipt
+        }, {
+          transaction: t,
+        });
+
+      await this.transactionStatusRepository.create(
+        {
+          transactionId: newTransaction.id,
+          status: errors.length ? TransactionStatusEnum.NEEDS_INTERVENTION : TransactionStatusEnum.PENDING,
+          errors: errors,
+        },
+        { transaction: t },
+      );
+
+      await this.receiptRepository.update({
+        status: ReceiptStatusEnum.PROCESSED
+      }, {
+        where: {
+          id: receiptId
+        },
+        transaction: t
+      })
+
+        return newTransaction;
+      });
+
+    } catch(e) {
+      console.log(e);
+      throw new Error(e);
+    }
   }
 
   private calculateAmount(amount: number, payout: Payout) {
     if (amount <= payout.huddleRate) return 0;
 
     return (amount - payout.huddleRate) * payout.amountPerKg;
+  }
+
+  /**
+ * Extracts the last path segment (S3 object key / filename) from a URL.
+ * Works in Node and browsers, handles query strings and fragments.
+ *
+ * @param {string} url - The full URL (can be presigned URL or plain S3 URL)
+ * @returns {string} - The filename / key (decoded), or empty string if not found
+ */
+ private extractFilenameFromUrl(url) {
+    if (typeof url !== 'string') return '';
+
+    try {
+      const parsed = new URL(url);
+      const parts = parsed.pathname.split('/').filter(Boolean);
+      return parts.length ? decodeURIComponent(parts[parts.length - 1]) : '';
+    } catch (err) {
+      // Fallback for non-standard URLs: strip query/fragment then split
+      const stripped = url.split('?')[0].split('#')[0];
+      const parts = stripped.split('/').filter(Boolean);
+      return parts.length ? decodeURIComponent(parts[parts.length - 1]) : '';
+    }
   }
 }

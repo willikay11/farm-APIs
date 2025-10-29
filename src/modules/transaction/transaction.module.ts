@@ -9,6 +9,7 @@ import { StaffMember } from '../staff/entities/staff.entity';
 import { AuthModule } from '../auth/auth.module';
 import { TransactionController } from './transaction.controller';
 import { Block } from '../block/entities/block.entity';
+import { Receipt } from '../receipts/entities/receipt.entity';
 
 @Module({
   imports: [
@@ -17,7 +18,8 @@ import { Block } from '../block/entities/block.entity';
       TransactionStatus,
       Expense,
       StaffMember,
-      Block
+      Block,
+      Receipt,
     ]),
     AuthModule,
   ],
