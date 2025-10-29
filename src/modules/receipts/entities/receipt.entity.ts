@@ -7,6 +7,7 @@ import {
   Default,
   PrimaryKey,
 } from 'sequelize-typescript';
+import { ReceiptStatusEnum } from 'src/modules/transaction/enum';
 
 @Table
 export class Receipt extends Model<Receipt> {
@@ -52,6 +53,17 @@ export class Receipt extends Model<Receipt> {
     allowNull: true,
   })
   chatId: number;
+
+  @Column({
+    type: DataType.STRING,
+    values: [
+      ReceiptStatusEnum.PENDING,
+      ReceiptStatusEnum.PROCESSED,
+    ],
+    allowNull: true,
+    defaultValue: ReceiptStatusEnum.PENDING,
+  })
+  status: string;
 
   @DeletedAt
   declare deletedAt: Date | null;

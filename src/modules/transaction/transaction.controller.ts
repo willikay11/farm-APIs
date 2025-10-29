@@ -2,6 +2,7 @@ import {
     Controller,
     Post,
     Body,
+    Param,
   } from '@nestjs/common';
 import { TransactionService } from './transaction.service';
 import { TransactionFromAutomationDto } from './dto/transaction.dto';
@@ -10,15 +11,17 @@ import { TransactionFromAutomationDto } from './dto/transaction.dto';
 export class TransactionController {
     constructor(private transactionService: TransactionService) {}
 
-    @Post()
-    async addTransactionFromAutomation(@Body() data: TransactionFromAutomationDto) {
-        await this.transactionService.addTransactionFromAutomation(data);
+    @Post("/:receiptId/automation")
+    async addTransactionFromAutomation(
+        @Body() data: TransactionFromAutomationDto,
+        @Param('receiptId') receiptId: string,
+    ) {
+        await this.transactionService.addTransactionFromAutomation(data, receiptId);
         return;
     }
 
-    @Post('test')
-    async testEndpoint(@Body() data: any) {
-        console.log('Test endpoint received data:', data);
-        return { message: 'Test endpoint received data successfully' };
+    @Post('trigger-automation')
+    async triggerAutomation() {
+       return await this.transactionService.triggerAutomation();
     }
 }

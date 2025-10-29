@@ -5,3 +5,8 @@ export enum TransactionStatusEnum {
   PAID = 'PAID',
   FAILED = 'FAILED',
 }
+
+export enum ReceiptStatusEnum {
+  PENDING = 'PENDING',
+  PROCESSED = 'PROCESSED',
+}
